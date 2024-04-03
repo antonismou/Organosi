@@ -103,39 +103,50 @@ BEGIN
 		rst <= '1';
 		r <= '0';
 		w <= '0';
-		wait for clk_period*10;	
+		wait for clk_period*3;	
 		rst <= '0';
 		r <= '1';
 		w <= '0';
-		wait for clk_period*10;	
+		wait for clk_period*3;	
 		r <= '0';
 		w <= '1';
-		wait for clk_period*10;
+		wait for clk_period*3;
 		rst <= '1';
 		r <= '1';
 		w <= '1';
-		wait for clk_period*10;
+		wait for clk_period*3;
 		rst <= '0';
 		r <= '1';
 		w <= '1';
-		wait for clk_period*10;
+		--all states cheacked
+		wait for clk_period*3;
 		rst <= '1';
 		r <= '0';
 		w <= '0';
-		wait for clk_period*10;
+		wait for clk_period*3;
+		--cheack the read state (we want to see valid=1 numOut=2)
 		rst <= '0';
-		r <= '0';
-		w <= '1';
-		addrr<= "01010";
+		r <= '1';
+		w <= '0';
+		addrr<= "00010";
 		addrw<= "01010";
 		numberIn <= x"0005";
 		wait for clk_period*10;
+		--cheack again the read state (we want to see valid=1 numOut=1)
 		rst <= '0';
 		r <= '1';
-		w <= '1';
-		addrr<= "01010";
+		w <= '0';
+		addrr<= "00001";
 		addrw<= "01011";
 		numberIn <= x"0002";
+		wait for clk_period*10;
+		--cheack again the read state (we want to see valid=1 numOut=0)
+		rst <= '0';
+		r <= '1';
+		w <= '0';
+		addrr<= "00000";
+		addrw<= "01001";
+		numberIn <= x"0006";
 		wait for clk_period*10;
 	
 	

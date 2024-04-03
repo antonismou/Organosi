@@ -58,7 +58,7 @@ begin
 		end if;
 	end process;	
 	
-	output : process(fsm_state)
+	output : process(fsm_state,addrwIn,addrrIn,numberInIn)
 	begin
 		case fsm_state is
 			when idle =>
@@ -67,16 +67,19 @@ begin
 			when toRead =>
 				we <= '0'; 
 				valid <= '1';
+				addrrOut <= addrrIn;
 			when toWrite =>
 				we <= '1'; 
 				valid <= '0';
+				numberInOut <= numberInIn; 
+				addrwOut <= addrwIn;
 			when toReadWrite =>
 				we <= '1'; 
 				valid <= '1';
+				numberInOut <= numberInIn; 
+				addrwOut <= addrwIn;
+				addrrOut <= addrrIn;
 			end case;
-			addrwOut <= addrwIn;
-			addrrOut <= addrrIn;
-			numberInOut <= numberInIn; 
 		end process;
 				
 
