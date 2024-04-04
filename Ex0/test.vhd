@@ -148,6 +148,22 @@ BEGIN
 		addrw<= "01001";
 		numberIn <= x"0006";
 		wait for clk_period*10;
+		--(expaicting to see valid=1 numberOut=32 and to write the number 1 to address 32)
+		rst<= '0';
+		r <= '1';
+		w <= '1';
+		addrr<= "1111";
+		addrw<= "1111";
+		numberIn <= x"0001";
+		wait for clk_period*10;
+		--(expaicting to see Valid=1 numberOut=1 that we wrote in the previous clock event=1)
+		rst<= '0';
+		r <= '1';
+		w <= '0';
+		addrr<= "1111";
+		addrw<= "1111";
+		numberIn <= x"0001";
+		
 	
 	
       -- insert stimulus here 
