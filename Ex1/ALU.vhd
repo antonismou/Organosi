@@ -61,7 +61,7 @@ Component add_sub_ALU is
 			Ovf : out  STD_LOGIC);
 	end Component;	
 
-	Component alu_shift_logic is
+	Component alu_shiftLogic is
 		Port(A : in  STD_LOGIC_VECTOR (31 downto 0);
 			B : in  STD_LOGIC_VECTOR (31 downto 0);
 			Op : in  STD_LOGIC_VECTOR (3 downto 0);
