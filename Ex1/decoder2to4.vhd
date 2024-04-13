@@ -32,28 +32,19 @@ use IEEE.STD_LOGIC_1164.ALL;
 entity decoder2to4 is
 port(
 	din : in STD_LOGIC_VECTOR(1 downto 0);
-	en : in STD_LOGIC;
 	dout : out STD_LOGIC_VECTOR(3 downto 0)
 );
 end decoder2to4;
 
 architecture Behavioral of decoder2to4 is
 begin
-	process(en,din)
+	process(din)
 	begin
-		case en is
-			when '1' =>
-				if din = "00" then
-					dout <= "0001";
-				elsif din = "01" then
-					dout <= "0010";
-				elsif din = "10" then
-					dout <= "0100";
-				else 
-					dout <= "1000";
-				end if;
-			when others =>
-				dout <= "0000";
+		case din is
+			when "00" =>  dout <= "0001";
+			when "01" =>  dout <= "0010";
+			when "10" =>  dout <= "0100";
+			when others => dout <= "1000";
 		end case;
 	end process;
 end Behavioral;
