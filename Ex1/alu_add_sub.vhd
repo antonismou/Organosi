@@ -36,18 +36,17 @@ SIGNAL temp : STD_LOGIC_VECTOR (32 downto 0);
 
 begin
 
-	process(A,B,Op) is
+	process is
 	begin
 		if Op = "0000" then --add
 			temp <=((A(31) & A) + (B(31) & B)); 
-		else
+		elsif Op = "0001" then --sub
 			temp <=  ((A(31) & A) - (B(31) & B)); 
-		 
 		end if;
 	end process;
 	
 
-	process(A,B,Op,temp) is
+	process is
 	begin										
 		if((Op = "0000") AND (A(31) = B(31)) AND ( A(31) /= temp(31))) then
 			Ovf <= '1';
@@ -59,7 +58,7 @@ begin
 	end process;
 	
 
-	process(temp) is 
+	process is 
 	begin
 		if temp = x"00000000" then
 			Zero <= '1';

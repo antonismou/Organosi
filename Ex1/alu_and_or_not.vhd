@@ -42,7 +42,7 @@ end alu_and_or_not;
 architecture Behavioral of alu_and_or_not is
 signal temp: STD_LOGIC_VECTOR (31 downto 0);
 begin
-	process(A,B,Op)	is
+	process
 	begin
 		Cout<='0';
 		Ovf<='0';
@@ -50,12 +50,12 @@ begin
 			temp<= (A and B);
 		elsif Op="0011" then
 			temp<= (A or B);
-		else
+		elsif Op ="0100" then
 			temp<= (not A);
 		end if;
 	end process;
 	
-	process(temp) is
+	process is
 	begin
 		if temp = x"00000000" then
 			Zero <= '1';
