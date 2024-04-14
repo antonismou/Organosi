@@ -37,7 +37,7 @@ end extendMSB;
 architecture Behavioral of extendMSB is
 
 begin
-immed <= resize(signed(din),16); 
+immed <= std_logic_vector(resize(signed(din),32)); 
 
 end Behavioral;
 
