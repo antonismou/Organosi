@@ -40,18 +40,19 @@ ARCHITECTURE behavior OF mux8Tests IS
     -- Component Declaration for the Unit Under Test (UUT)
  
     COMPONENT mux8
-    PORT(
-         a1 : IN  std_logic_vector(31 downto 0);
-         a2 : IN  std_logic_vector(31 downto 0);
-         a3 : IN  std_logic_vector(31 downto 0);
-         a4 : IN  std_logic_vector(31 downto 0);
-         a5 : IN  std_logic_vector(31 downto 0);
-         a6 : IN  std_logic_vector(31 downto 0);
-         a7 : IN  std_logic_vector(31 downto 0);
-         a8 : IN  std_logic_vector(31 downto 0);
-         sel : IN  std_logic_vector(3 downto 0);
-         b : OUT  std_logic_vector(31 downto 0)
-        );
+    generic(dataWidth: integer := 32);
+		port (
+			a1  : in std_logic_vector(dataWidth-1 downto 0);
+			a2  : in std_logic_vector(dataWidth-1 downto 0);
+			a3  : in std_logic_vector(dataWidth-1 downto 0);
+			a4  : in std_logic_vector(dataWidth-1 downto 0);
+			a5  : in std_logic_vector(dataWidth-1 downto 0);
+			a6  : in std_logic_vector(dataWidth-1 downto 0);
+			a7  : in std_logic_vector(dataWidth-1 downto 0);
+			a8  : in std_logic_vector(dataWidth-1 downto 0);
+			sel     : in  std_logic_vector(3 downto 0);
+			b       : out std_logic_vector(dataWidth-1 downto 0)
+		);
     END COMPONENT;
     
 
@@ -72,7 +73,8 @@ ARCHITECTURE behavior OF mux8Tests IS
 BEGIN
  
 	-- Instantiate the Unit Under Test (UUT)
-   uut: mux8 PORT MAP (
+   uut: mux8 generic map(dataWidth => 32)
+	PORT MAP (
           a1 => a1,
           a2 => a2,
           a3 => a3,

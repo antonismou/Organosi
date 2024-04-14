@@ -30,78 +30,82 @@ use IEEE.STD_LOGIC_1164.ALL;
 --use UNISIM.VComponents.all;
 
 entity mux32 is
+generic(dataWidth: integer := 32);
 port(
-	a1  : in std_logic_vector(31 downto 0);
-	a2  : in std_logic_vector(31 downto 0);
-	a3  : in std_logic_vector(31 downto 0);
-	a4  : in std_logic_vector(31 downto 0);
-	a5  : in std_logic_vector(31 downto 0);
-	a6  : in std_logic_vector(31 downto 0);
-	a7  : in std_logic_vector(31 downto 0);
-	a8  : in std_logic_vector(31 downto 0);
-	a9  : in std_logic_vector(31 downto 0);
-	a10 : in std_logic_vector(31 downto 0);
-	a11 : in std_logic_vector(31 downto 0);
-	a12 : in std_logic_vector(31 downto 0);
-	a13 : in std_logic_vector(31 downto 0);
-	a14 : in std_logic_vector(31 downto 0);
-	a15 : in std_logic_vector(31 downto 0);
-	a16 : in std_logic_vector(31 downto 0);
-	a17 : in std_logic_vector(31 downto 0);
-	a18 : in std_logic_vector(31 downto 0);
-	a19 : in std_logic_vector(31 downto 0);
-	a20 : in std_logic_vector(31 downto 0);
-	a21 : in std_logic_vector(31 downto 0);
-	a22 : in std_logic_vector(31 downto 0);
-	a23 : in std_logic_vector(31 downto 0);
-	a24 : in std_logic_vector(31 downto 0);
-	a25 : in std_logic_vector(31 downto 0);
-	a26 : in std_logic_vector(31 downto 0);
-	a27 : in std_logic_vector(31 downto 0);
-	a28 : in std_logic_vector(31 downto 0);
-	a29 : in std_logic_vector(31 downto 0);
-	a30 : in std_logic_vector(31 downto 0);
-	a31 : in std_logic_vector(31 downto 0);
-	a32 : in std_logic_vector(31 downto 0);
+	a1  : in std_logic_vector(dataWidth-1 downto 0);
+	a2  : in std_logic_vector(dataWidth-1 downto 0);
+	a3  : in std_logic_vector(dataWidth-1 downto 0);
+	a4  : in std_logic_vector(dataWidth-1 downto 0);
+	a5  : in std_logic_vector(dataWidth-1 downto 0);
+	a6  : in std_logic_vector(dataWidth-1 downto 0);
+	a7  : in std_logic_vector(dataWidth-1 downto 0);
+	a8  : in std_logic_vector(dataWidth-1 downto 0);
+	a9  : in std_logic_vector(dataWidth-1 downto 0);
+	a10 : in std_logic_vector(dataWidth-1  downto 0);
+	a11 : in std_logic_vector(dataWidth-1 downto 0);
+	a12 : in std_logic_vector(dataWidth-1  downto 0);
+	a13 : in std_logic_vector(dataWidth-1 downto 0);
+	a14 : in std_logic_vector(dataWidth-1 downto 0);
+	a15 : in std_logic_vector(dataWidth-1 downto 0);
+	a16 : in std_logic_vector(dataWidth-1  downto 0);
+	a17 : in std_logic_vector(dataWidth-1 downto 0);
+	a18 : in std_logic_vector(dataWidth-1 downto 0);
+	a19 : in std_logic_vector(dataWidth-1 downto 0);
+	a20 : in std_logic_vector(dataWidth-1 downto 0);
+	a21 : in std_logic_vector(dataWidth-1 downto 0);
+	a22 : in std_logic_vector(dataWidth-1 downto 0);
+	a23 : in std_logic_vector(dataWidth-1 downto 0);
+	a24 : in std_logic_vector(dataWidth-1 downto 0);
+	a25 : in std_logic_vector(dataWidth-1 downto 0);
+	a26 : in std_logic_vector(dataWidth-1 downto 0);
+	a27 : in std_logic_vector(dataWidth-1 downto 0);
+	a28 : in std_logic_vector(dataWidth-1 downto 0);
+	a29 : in std_logic_vector(dataWidth-1 downto 0);
+	a30 : in std_logic_vector(dataWidth-1 downto 0);
+	a31 : in std_logic_vector(dataWidth-1 downto 0);
+	a32 : in std_logic_vector(dataWidth-1 downto 0);
 	sel : in  std_logic_vector(4 downto 0);
-	b   : out std_logic_vector(31 downto 0)
+	b   : out std_logic_vector(dataWidth-1 downto 0)
 	);
 end mux32;
 
 architecture Behavioral of mux32 is
 	COMPONENT mux16 is
+	generic(dataWidth: integer := 32);
     PORT(
-         a1 : IN  std_logic_vector(31 downto 0);
-         a2 : IN  std_logic_vector(31 downto 0);
-         a3 : IN  std_logic_vector(31 downto 0);
-         a4 : IN  std_logic_vector(31 downto 0);
-         a5 : IN  std_logic_vector(31 downto 0);
-         a6 : IN  std_logic_vector(31 downto 0);
-         a7 : IN  std_logic_vector(31 downto 0);
-         a8 : IN  std_logic_vector(31 downto 0);
-         a9 : IN  std_logic_vector(31 downto 0);
-         a10 : IN  std_logic_vector(31 downto 0);
-         a11 : IN  std_logic_vector(31 downto 0);
-         a12 : IN  std_logic_vector(31 downto 0);
-         a13 : IN  std_logic_vector(31 downto 0);
-         a14 : IN  std_logic_vector(31 downto 0);
-         a15 : IN  std_logic_vector(31 downto 0);
-         a16 : IN  std_logic_vector(31 downto 0);
-         sel : IN  std_logic_vector(3 downto 0);
-         b : OUT  std_logic_vector(31 downto 0)
+         a1  : in std_logic_vector(dataWidth-1 downto 0);
+			a2  : in std_logic_vector(dataWidth-1 downto 0);
+			a3  : in std_logic_vector(dataWidth-1 downto 0);
+			a4  : in std_logic_vector(dataWidth-1 downto 0);
+			a5  : in std_logic_vector(dataWidth-1 downto 0);
+			a6  : in std_logic_vector(dataWidth-1 downto 0);
+			a7  : in std_logic_vector(dataWidth-1 downto 0);
+			a8  : in std_logic_vector(dataWidth-1 downto 0);
+			a9  : in std_logic_vector(dataWidth-1 downto 0);
+			a10 : in std_logic_vector(dataWidth-1 downto 0);
+			a11 : in std_logic_vector(dataWidth-1 downto 0);
+			a12 : in std_logic_vector(dataWidth-1 downto 0);
+			a13 : in std_logic_vector(dataWidth-1 downto 0);
+			a14 : in std_logic_vector(dataWidth-1 downto 0);
+			a15 : in std_logic_vector(dataWidth-1 downto 0);
+			a16 : in std_logic_vector(dataWidth-1 downto 0);
+			sel : in  std_logic_vector(3 downto 0);
+			b   : out std_logic_vector(dataWidth-1 downto 0)
         );
     END COMPONENT mux16;
 	 COMPONENT mux2 is
+	 generic(dataWidth: integer := 32);
     PORT(
-         a1 : IN  std_logic_vector(31 downto 0);
-         a2 : IN  std_logic_vector(31 downto 0);
+         a1 : IN  std_logic_vector(dataWidth-1 downto 0);
+         a2 : IN  std_logic_vector(dataWidth-1 downto 0);
          sel : IN  std_logic;
-         b : OUT  std_logic_vector(31 downto 0)
+         b : OUT  std_logic_vector(dataWidth-1 downto 0)
         );
     END COMPONENT mux2;
-	 signal b1,b2 : std_logic_vector(31 downto 0);
+	 signal b1,b2 : std_logic_vector(dataWidth-1 downto 0);
 begin
 	mux_1 : mux16
+	generic map(dataWidth => dataWidth)
 	port map(
 		a1 => a1,
 		a2 => a2,
@@ -122,7 +126,7 @@ begin
 		sel => sel(3 downto 0),
 		b => b1
 	);
-	mux_2 : mux16
+	mux_2 : mux16 generic map(dataWidth => dataWidth)
 	port map(
 		a1 => a17,
 		a2 => a18,
@@ -143,7 +147,7 @@ begin
 		sel => sel(3 downto 0),
 		b => b2
 	);
-	mux_3 : mux2
+	mux_3 : mux2 generic map(dataWidth => dataWidth)
 	port map(
 	a1 => b1,
 	a2 => b2,

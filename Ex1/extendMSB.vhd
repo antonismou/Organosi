@@ -2,9 +2,9 @@
 -- Company: 
 -- Engineer: 
 -- 
--- Create Date:    19:41:43 04/08/2024 
+-- Create Date:    00:37:58 04/12/2024 
 -- Design Name: 
--- Module Name:    mux2 - Behavioral 
+-- Module Name:    extendMSB - Behavioral 
 -- Project Name: 
 -- Target Devices: 
 -- Tool versions: 
@@ -22,37 +22,22 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
+use IEEE.NUMERIC_STD.ALL;
 
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx primitives in this code.
 --library UNISIM;
 --use UNISIM.VComponents.all;
 
-entity mux2 is
-generic(
-dataWidth: integer := 32 
-);
-port(
-	a1  : in std_logic_vector(dataWidth-1 downto 0);
-	a2  : in std_logic_vector(dataWidth-1 downto 0);
-	sel : in  std_logic;
-	b   : out std_logic_vector(dataWidth-1 downto 0)
-);
-end mux2;
+entity extendMSB is
+    Port ( din : in  STD_LOGIC_VECTOR (15 downto 0);
+           immed : out  STD_LOGIC_VECTOR (31 downto 0));
+end extendMSB;
 
-architecture Behavioral of mux2 is
-	
+architecture Behavioral of extendMSB is
+
 begin
-	process(a1,a2,sel)
-	begin
-		if sel = '0' then
-			b <= a1;
-		else 
-			b <= a2;
-		end if;
-	end process;
-	
+immed <= resize(signed(din),16); 
 
 end Behavioral;
 
