@@ -44,8 +44,7 @@ architecture structural of decoder5to32 is
 	
 	component decoder2to4
 		port (din : in STD_LOGIC_VECTOR (1 downto 0);
-				dout : out STD_LOGIC_VECTOR (3 downto 0);
-				en : in STD_LOGIC
+				dout : out STD_LOGIC_VECTOR (3 downto 0)
 				);
 	end component;
 
@@ -55,8 +54,7 @@ architecture structural of decoder5to32 is
 		
 		D0 : decoder2to4
 			port map ( din => din(4 downto 3),
-						  dout => dec_intern,
-						  en => '1'
+						  dout => dec_intern
 						);
 							
 		D1 : decoder3to8

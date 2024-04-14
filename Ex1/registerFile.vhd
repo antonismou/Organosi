@@ -129,12 +129,12 @@ begin
 	
 	decoder : decoder5to32 port map(din => addrw, dout => decoderOut);
 	
---	process(we,decoderOut)
---	begin
+	process(we,decoderOut)
+	begin
 		for i in 0 to 31 loop
 			weS(i) <= decoderOut(i) and we;
 		end loop;
-	--end process;
+	end process;
 
 end Behavioral;
 
