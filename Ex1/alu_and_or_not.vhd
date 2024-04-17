@@ -40,33 +40,19 @@ entity alu_and_or_not is
 end alu_and_or_not;
 
 architecture Behavioral of alu_and_or_not is
-signal temp: STD_LOGIC_VECTOR (31 downto 0);
+
 begin
-	process
+	process(A,B,Op) is
 	begin
 		Cout<='0';
 		Ovf<='0';
+		Zero<='0';
 		if Op="0010" then
-			temp<= (A and B);
+			Output<= (A and B);
 		elsif Op="0011" then
-			temp<= (A or B);
-		elsif Op ="0100" then
-			temp<= (not A);
-		end if;
-	end process;
-	
-	process is
-	begin
-		if temp = x"00000000" then
-			Zero <= '1';
+			Output<= (A or B);
 		else
-			Zero <='0';
+			Output<= (not A);
 		end if;
 	end process;
-	Output <= temp ; 
-	
-		
-
-
 end Behavioral;
-

@@ -39,7 +39,7 @@ Port ( A : in  STD_LOGIC_VECTOR (31 downto 0);
            Ovf : out  STD_LOGIC);
 end ALU;
 
-architecture Behavioral of ALU is
+architecture Structural of ALU is
 
 Component add_sub_ALU is
 		Port(A : in  STD_LOGIC_VECTOR (31 downto 0);
@@ -120,5 +120,5 @@ mux_3: mux4Single port map(
 mux_4: mux4Single port map(
 		a1=>as_Zero, a2=>logic_Zero ,a3 => shift_Zero,a4 => shift_Zero, sel =>selS, b=> Zero);
 
-end Behavioral;
+end Structural;
 

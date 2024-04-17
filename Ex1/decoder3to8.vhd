@@ -36,7 +36,7 @@ entity decoder3to8 is
   end decoder3to8;
 architecture Behavioral of decoder3to8 is
 begin
-process(din)
+process(din,en)
      begin
 	  if en = '1' then
 			case din is

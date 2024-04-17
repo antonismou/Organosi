@@ -31,7 +31,6 @@ use IEEE.NUMERIC_STD.ALL;
 
 entity alu_shiftLogic is
   Port ( A : in  STD_LOGIC_VECTOR (31 downto 0);
-           B : in  STD_LOGIC_VECTOR (31 downto 0);
            Op : in  STD_LOGIC_VECTOR (3 downto 0);
            Output : out  STD_LOGIC_VECTOR (31 downto 0);
            Zero : out  STD_LOGIC;
@@ -42,35 +41,26 @@ end alu_shiftLogic;
 architecture Behavioral of alu_shiftLogic is
 signal temp: STD_LOGIC_VECTOR (31 downto 0);
 begin
-	process
+	process(A,Op) is
 	begin
-		case Op is
-			when "1000" =>
-				temp<=(STD_LOGIC_VECTOR(shift_right(signed(A),1)));
-			when "1001" =>
-				temp<=(STD_LOGIC_VECTOR(shift_right(unsigned(A),1)));
-			when "1010" =>
-				temp<= (STD_LOGIC_VECTOR(shift_left(unsigned(A),1)));
-			when "1100" =>
-				temp<= (STD_LOGIC_VECTOR(rotate_left(unsigned(A),1)));
-			when "1101" =>
-				temp<= (STD_LOGIC_VECTOR(rotate_right(unsigned(A),1)));
-			when others=>
+		Cout<='0';
+		Ovf<='0';
+		Zero<='0';
+			if Op= "1000" then
+				Output<=(STD_LOGIC_VECTOR(shift_right(signed(A),1)));
+			elsif Op= "1001" then
+				Output<=(STD_LOGIC_VECTOR(shift_right(unsigned(A),1)));
+			elsif Op= "1010" then
+				Output<= (STD_LOGIC_VECTOR(shift_left(unsigned(A),1)));
+			elsif Op= "1100" then
+				Output<= (STD_LOGIC_VECTOR(rotate_left(unsigned(A),1)));
+			else
+				Output<= (STD_LOGIC_VECTOR(rotate_right(unsigned(A),1)));
 		
-		end case;
-	end process;
-	process is
-	begin
-		if temp = x"00000000" then
-			Zero <= '1';
-		else
-			Zero <='0';
 		end if;
 	end process;
-	Output <= temp ; 
-			
+
 
 
 
 end Behavioral;
-

@@ -90,7 +90,7 @@ process_control: reg port map(
 	clk=>clk, rst=>rst, we=>Pc_LdEn, data=>mux2_out, dout=>reg_out);
 	
 rom_mem : IFROM port map (
-	clk=>clk,a=>reg_out, spo=>Instr);
+	clk=>clk,a=>reg_out(11 downto 2), spo=>Instr);
 
 
 
