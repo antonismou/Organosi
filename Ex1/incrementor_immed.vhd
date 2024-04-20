@@ -44,7 +44,7 @@ architecture Behavioral of incrementor_immed is
 begin
 --	incrementor_4: incrementor_4 port map (
 --		input=>in
-	output<= input_incr_4 + immed;
+	output<= input_incr_4 + (immed(29 downto 0) & "00");
 
 end Behavioral;
 

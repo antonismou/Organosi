@@ -35,7 +35,10 @@ entity ALU_ex is
            Immed : in  STD_LOGIC_VECTOR (31 downto 0);
            ALU_Bin_sel : in  STD_LOGIC;
            ALU_Func : in  STD_LOGIC_VECTOR (3 downto 0);
-           ALU_out : out  STD_LOGIC_VECTOR (31 downto 0));
+           ALU_out : out  STD_LOGIC_VECTOR (31 downto 0);
+			  Zero : out  STD_LOGIC;
+           Cout : out  STD_LOGIC;
+           Ovf : out  STD_LOGIC);
 end ALU_ex;
 
 architecture Behavioral of ALU_ex is
@@ -61,7 +64,7 @@ mux : mux2 port map(
 	a1=>RF_B,a2=>Immed,sel=>ALU_Bin_sel,b=>mux_out);
 
 Alu_comp : ALU port map(
-	A=>RF_A,B=>mux_out,Op=>ALU_func,Output=>ALU_out);
+	A=>RF_A,B=>mux_out,Op=>ALU_func,Output=>ALU_out,Zero => Zero, Cout => Cout, Ovf => Ovf);
 
 
 end Behavioral;
