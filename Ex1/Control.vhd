@@ -30,73 +30,158 @@ use IEEE.STD_LOGIC_1164.ALL;
 --use UNISIM.VComponents.all;
 
 entity Control is
-    Port ( instr : in  STD_LOGIC_VECTOR (31 downto 0);
-           pcSel : out  STD_LOGIC;
-           pcLdEn : out  STD_LOGIC;
-           rfWe : out  STD_LOGIC;
-           rfBSel : out  STD_LOGIC;
-           rfWrDataSel : out  STD_LOGIC;
-           memWe : out  STD_LOGIC;
-           rstOut : out  STD_LOGIC;
-           rst : in  STD_LOGIC;
-			  clk: in STD_LOGIC);
+    Port (	instr : in  STD_LOGIC_VECTOR (31 downto 0);
+			zero : in std_logic;
+			ovf : in std_logic;
+			cout : in std_logic;
+        	pcSel : out  STD_LOGIC;
+        	pcLdEn : out  STD_LOGIC;
+        	rfWe : out  STD_LOGIC;
+        	rfBSel : out  STD_LOGIC;
+        	rfWrDataSel : out  STD_LOGIC;
+        	memWe : out  STD_LOGIC;
+			aluBinSel : out std_logic;
+			aluFunc : out STD_LOGIC_VECTOR(3 downto 0);
+        	rstOut : out  STD_LOGIC;
+        	rst : in  STD_LOGIC;
+			clk: in STD_LOGIC);
 end Control;
 
 architecture Behavioral of Control is
-type fsmStates is (insFe,opFe,ex,wb);
+type fsmStates is (rtype,li,lui,addi,andi,ori,b,beq,bne,lb,lw,sb,sw,idle);
 signal state : fsmStates;
 
 begin
-	 process
-	 begin
-		wait until clk'event and clk = '1';
-		if rst = '1' or instr = "00000000000000000000000000000000" then
-			state <= insFe;
-		else 
-			state <= insFe; --prepei na to ftiaksoume ebala kati ka8ara gia to error
-		end if;
-	end process;
-	
-	process(state)
+	findState : process(instr)
 	begin
-	case state is
-		when insFe =>
-			if instr(31) = '0' and instr(30) = '1' then		--branch
-				pcSel <= '1';
-			else
-				pcSel <= '0';
-			end if;
-			pcLdEn <= '1';
-			rfWe <= '0'; rfBSel <= '0'; rfWrDataSel <= '0'; memWe <= '0'; rstOut <= '0';		
-		when opFe =>
-			pcLdEn <= '0'; rfWe <= '0';
-			if instr(30) = '1' then 	--immed
-				rfBSel <= '1';
-			else
-				rfBSel <= '0';
-			end if;
-         rfWrDataSel <= '0'; memWe <= '0'; rstOut <= '0';	
-		when ex =>
-			pcLdEn <= '0';
-			rfWe <= '0';
-			if instr(31) = '1' and instr(28) = '0' then 	--alu wb to rf
-				rfWrDataSel <= '0';
-				
-			else
-				rfWrDataSel <= '1';
-			end if;
-         memWe <= '0';
-         rstOut <= '0';	
-		when wb =>
-			pcLdEn <= '0';
-			if instr(31 downto 26) = "011111" or instr(31 downto 26) = "000111" then 	--wrte to mem
-				memWe<='1';
-			else
-				rfWe <= '1';
-			end if;	
-			
+		case instr(31 downto 26) is
+			when "100000" => state <= rtype;
+			when "111000" => state <= li;	
+			when "111001" => state <= lui;
+			when "110000" => state <= addi;
+			when "110010" => state <= andi;
+			when "110011" => state <= ori;
+			when "111111" => state <= b;
+			when "010000" => state <= beq;
+			when "010001" => state <= bne;
+			when "000011" => state <= lb;
+			when "001111" => state <= lw;
+			when "000111" => state <= sb;
+			when "011111" => state <= sw;
+			when others => state <= idle;
 		end case;
 	end process;
-
+	
+	
+	output: process(state)
+	begin
+		case state is
+			when idle =>
+				pcSel <= '0';
+				pcLdEn <= '1';
+				rfWe <= '0';
+				memWe <= '0';
+				--------------
+				rfWrDataSel <= '0';
+				rfBSel <= '0';
+				aluBinSel <= '0';
+				aluFunc <= "0000";
+			when rtype => 
+				pcSel <= '0';
+				pcLdEn <= '1';
+				rfWe <= '1';
+				rfWrDataSel <= '0';
+				memWe <= '0';
+				rfBSel <= '0';
+				aluBinSel <= '0';
+				aluFunc <= instr(3 downto 0);
+			when li | lui =>
+				pcSel <= '0';
+				pcLdEn <= '1';
+				rfWe <= '1';
+				rfWrDataSel <= '0';
+				memWe <= '0';
+				rfBSel <= '1';
+				aluBinSel <= '1';
+				aluFunc <= "0000";
+			when addi | andi | ori =>
+				pcSel <= '0';
+				pcLdEn <= '1';
+				rfWe <= '1';
+				rfWrDataSel <= '0';
+				memWe <= '0';
+				rfBSel <= '1';
+				aluBinSel <= '1';
+				aluFunc <= instr(3 downto 0);
+			when b =>
+				pcSel <= '1';
+				pcLdEn <= '1';
+				rfWe <= '0';
+				rfWrDataSel <= '0';
+				memWe <= '0';
+				rfBSel <= '0';
+				aluBinSel <= '0';
+				--aluFunc don't care
+				aluFunc <= "0000";
+			when beq =>
+				if zero = '0' then
+					pcSel <= '0';
+				else
+					pcSel <= '1';
+				end if;
+				pcLdEn <= '1';
+				rfWe <= '0';
+				rfWrDataSel <= '0';
+				memWe <= '0';
+				rfBSel <= '0';
+				aluBinSel <= '0';
+				aluFunc <= "0001";
+			when bne =>
+				if zero = '1' then
+					pcSel <= '0';
+				else
+					pcSel <= '1';
+				end if;
+				pcLdEn <= '1';
+				rfWe <= '0';
+				rfWrDataSel <= '0';
+				memWe <= '0';
+				rfBSel <= '0';
+				aluBinSel <= '0';
+				aluFunc <= "0001";	
+			when lb | lw =>
+				pcSel <= '0';
+				pcLdEn <= '1';
+				rfWe <= '1';
+				rfWrDataSel <= '1';
+				memWe <= '0';
+				rfBSel <= '1';
+				aluBinSel <= '1';
+				--aluFunc don't care	
+				aluFunc <= "0000";
+			when sb | sw =>
+				pcSel <= '0';
+				pcLdEn <= '1';
+				rfWe <= '0';
+				--rfWrDataSel don't care
+				rfWrDataSel <= '0';
+				memWe <= '1';
+				rfBSel <= '1';
+				aluBinSel <= '1';
+				--aluFunc don't care
+				aluFunc <= "0000";
+			when others => 
+				pcSel <= '0';
+				pcLdEn <= '0';
+				rfWe <= '0';
+				rfWrDataSel <= '0';
+				memWe <= '0';
+				rfBSel <= '0';
+				aluBinSel <= '0';
+				aluFunc <= "0000";
+			end case;
+	end process;
 end Behavioral;
 
+
+
