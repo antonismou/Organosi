@@ -36,7 +36,10 @@ entity Datapath is
            pcLdEn : in  STD_LOGIC;
            RFWe : in std_logic;
            RFWrData : in std_logic;
+			  RF_B_sel : in std_logic;
            WeMem : in std_logic;
+			  ALU_Bin_sel : in std_logic;
+			  ALU_Func : in std_logic;
            Zero : out std_logic;
            Ovf : out std_logic;
            Cout : out std_logic);
@@ -89,12 +92,13 @@ signal instrS,AluOutS,MemOutS,immedS,RFA,RFB : STD_LOGIC_VECTOR(31 downto 0);
 begin
 InsFetch: IFSTAGE port map(PC_Immed => immedS, PC_sel => pcSel, PC_LdEn => pcLdEn, rst => RST, clk => clk, Instr => instrS);
 Decoder: DECSTAGE port map(
-	instr => instrS, rst => rst, clk => clk, RF_we => RFWe, ALUOut => AluOutS, MEMOut => MemOutS, RF_B_sel => instrS(30),
+	instr => instrS, rst => rst, clk => clk, RF_we => RFWe, ALUOut => AluOutS, MEMOut => MemOutS, RF_B_sel => RF_B_sel,
 	RF_wData_sel => RFWrData, immed => immedS, RF_A => RFA, RF_B => RFB);
-AlU: ALU_ex port map(RF_A => RFA, RF_B => RFB, immed => immedS, ALU_Bin_sel => instrS(30),
-	ALU_Func => instrS(3 downto 0), ALU_out => AluOutS, Zero=> Zero, Ovf => Ovf, Cout => Cout);
+AlU: ALU_ex port map(RF_A => RFA, RF_B => RFB, immed => immedS, ALU_Bin_sel => ALU_Bin_sel,
+	ALU_Func => ALU_Func , ALU_out => AluOutS, Zero=> Zero, Ovf => Ovf, Cout => Cout);
 MEMO : MEM port map(clk => clk, Mem_WrEn => WeMem , ALU_MEM_addr => AluOutS, MEM_DataOut => MemOutS, MEM_DataIn =>RFB);
 --WeMemS <= ((not instrS(31)) and (not instrS(30)) and (not instrS(29)) and instrS(28)) or
 --			 ((not instrS(31)) and instrS(30) and instrS(29) and instrS(28));
+
 end Behavioral;
 
