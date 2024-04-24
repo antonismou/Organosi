@@ -39,10 +39,11 @@ entity Datapath is
 			  RF_B_sel : in std_logic;
            WeMem : in std_logic;
 			  ALU_Bin_sel : in std_logic;
-			  ALU_Func : in std_logic;
+			  ALU_Func : in std_logic_vector(3 downto 0);
            Zero : out std_logic;
            Ovf : out std_logic;
-           Cout : out std_logic);
+           Cout : out std_logic;
+			  instr : out  STD_LOGIC_VECTOR (31 downto 0));
 end Datapath;
 
 architecture Behavioral of Datapath is
@@ -99,6 +100,5 @@ AlU: ALU_ex port map(RF_A => RFA, RF_B => RFB, immed => immedS, ALU_Bin_sel => A
 MEMO : MEM port map(clk => clk, Mem_WrEn => WeMem , ALU_MEM_addr => AluOutS, MEM_DataOut => MemOutS, MEM_DataIn =>RFB);
 --WeMemS <= ((not instrS(31)) and (not instrS(30)) and (not instrS(29)) and instrS(28)) or
 --			 ((not instrS(31)) and instrS(30) and instrS(29) and instrS(28));
-
+instr<= instrS;
 end Behavioral;
-
