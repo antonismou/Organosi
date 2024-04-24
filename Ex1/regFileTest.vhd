@@ -101,6 +101,7 @@ BEGIN
       -- hold reset state for 100 ns.
       wait for 100 ns;	
 		rst<='0';
+		
 
 
       -- insert stimulus here 

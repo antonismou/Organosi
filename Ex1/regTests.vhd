@@ -90,19 +90,19 @@ BEGIN
       -- hold reset state for 100 ns.
       wait for 100 ns;	
 		rst <='1';
-      wait for clk_period*10;
+      wait for clk_period;
 		rst <='0';
 		we <= '1';
 		data <= x"00001001";
-      wait for clk_period*10;
+      wait for clk_period;
 		rst <='1';
 		we <= '1';
 		data <= x"00001111";
-      wait for clk_period*10;
+      wait for clk_period;
 		rst <='0';
 		we <= '0';
 		data <= x"00001001";
-      wait for clk_period*10;
+      wait for clk_period;
 
       -- insert stimulus here 
 
