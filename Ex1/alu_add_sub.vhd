@@ -50,7 +50,7 @@ begin
 	begin										
 		if((Op = "0000") AND (A(31) = B(31)) AND ( A(31) /= temp(31))) then
 			Ovf <= '1';
-		elsif ((Op = "0001") AND (A(31) = B(31)) AND ( B(31) = temp(31))) then 
+		elsif ((Op = "0001") AND (A(31) /= B(31)) AND ( B(31) = temp(31))) then 
 			Ovf <= '1';
 		else 
 			Ovf <='0';

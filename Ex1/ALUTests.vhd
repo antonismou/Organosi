@@ -83,13 +83,69 @@ BEGIN
    -- Stimulus process
    stim_proc: process
    begin		
+		--check all the possible alu oparations
       -- hold reset state for 100 ns.
       wait for 100 ns;	
 		A <= x"00000001";
 		B <= x"00000002";
 		Op <= "0000";
-		
-      -- insert stimulus here 
+      wait for 100 ns;
+		A <= x"00000003";
+		B <= x"00000002";
+		Op <= "0001";
+		wait for 100 ns;
+		A <= x"00000003";
+		B <= x"00000002";
+		Op <= "0010";
+		wait for 100 ns;
+		A <= x"00000003";
+		B <= x"00000002";
+		Op <= "0011";
+		wait for 100 ns;
+		A <= x"00000003";
+		Op <= "0100";
+		wait for 100 ns;
+		A <= x"00000003";
+		Op <= "1000";
+		wait for 100 ns;
+		A <= x"00000003";
+		Op <= "1001";
+		wait for 100 ns;
+		A <= x"00000003";
+		Op <= "1010";
+		wait for 100 ns;
+		A <= x"00000003";
+		Op <= "1100";
+		wait for 100 ns;
+		A <= x"00000003";
+		Op <= "1101";
+		-- check Cout
+		wait for 100 ns;
+		A <= x"FFFFFFFF";
+		B <= x"FFFFFFFF";
+		Op <= "0000";
+		wait for 100 ns;
+		A<=x"80000000";
+		B<=x"7FFFFFFF";
+		Op<="0001";
+		--Check for Zero
+		wait for 100 ns;
+		A <= x"FFFFFFFF";
+		B <= x"FFFFFFFF";
+		Op <= "0001";
+		wait for 100 ns;
+		A <= x"7FFFFFFF";
+		B <= x"80000001";
+		Op <= "0000";
+		wait for 100 ns;
+		--Check overflow
+		A <= x"7FFFFFFF";
+		B <= x"00000001";
+		Op <= "0000";
+		wait for 100 ns;
+		A <= x"7FFFFFFF";
+		B <= x"80000000";
+		Op <= "0001";
 
       wait;
    end process;
