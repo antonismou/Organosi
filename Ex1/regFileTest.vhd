@@ -98,13 +98,37 @@ BEGIN
    -- Stimulus process
    stim_proc: process
    begin		
-      -- hold reset state for 100 ns.
-      wait for 100 ns;	
-		rst<='0';
+		rst<= '1';
+		wait for CLK_period*2;
 		
-
-
-      -- insert stimulus here 
+		-- Read two random registers (expecting value: 0)
+		rst<= '0';
+      addr1 <= "10101";
+      addr2 <= "01010";
+		wait for CLK_period;
+		
+		-- Check if R0 value remains 0 if we try to write it (and read it)
+      addr1 <= "00000";
+      addrw <= "00000";
+      we <= '1';
+      din <= X"FFFFFFFF";
+		wait for CLK_period*2;
+		
+		-- Write to Register1 without reading it
+		addrw <= "00001";
+		wait for CLK_period;
+		
+		-- Read what we just wrote (expecting value: dout1 = X"FFFFFFFF")
+		addr1 <= "00001";
+		we <= '0';
+		wait for CLK_period*2;
+		
+		-- Read and write in the same cycle
+		addr2 <= "11001";
+		addrw <= "11001";
+		we <= '1';
+		din <= X"C110B0AF";
+		wait for CLK_period;
 
       wait;
    end process;
