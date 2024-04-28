@@ -86,7 +86,7 @@ incrementorImmed: incrementor_immed port map(
 mux: mux2 port map(
 	a1=>incrementor_4_out,a2=>incrementor_out,sel=>PC_sel,b=>mux2_out);
 
-process_control: reg port map(
+program_counter: reg port map(
 	clk=>clk, rst=>rst, we=>Pc_LdEn, data=>mux2_out, dout=>reg_out);
 	
 rom_mem : IFROM port map (
