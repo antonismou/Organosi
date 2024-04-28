@@ -105,15 +105,25 @@ BEGIN
    stim_proc: process
    begin		
       rst <= '1';
-      wait for 100 ns;	
+      wait for 10 ns;
+		instr <= b"000000_00000_00011_00000_00000_000000"; --fake instr just to test if we write at reg3 
 		rst <= '0';
-		instr <= b"100000_00101_00011_00110_00000_110000";
-		RF_we <= '0';
-      wait for clk_period*10;
-		instr <= b"110000_00101_00011_00110_00000_110000";
-		RF_B_sel <= '1';
-
-      wait;
+		RF_we <= '1';	--write enable on
+		ALUOut <= x"FFFFFFFF";	
+		RF_wData_sel <= '0';	--select alu
+		wait for clk_period;
+		instr <= b"000000_00011_00000_00011_00000_000000"; --fake instr just to test if we read from reg3 
+		RF_we <= '0';	--write enable off
+		wait for clk_period;
+		instr <= b"000000_00010_00010_00010_00000_000000"; --fake instr just to test read write at same reg2
+		RF_we <= '1';	--write enable off
+		MEMOut <= x"AAAAAAAA";	
+		RF_wData_sel <= '1';	--select mem
+		wait for clk_period;
+		rst<='1';
+		instr <= b"000000_00011_00000_00010_00000_000000"; --fake instr just to test if we read from reg3 and reg2
+		wait;
+		
    end process;
 
 END;
