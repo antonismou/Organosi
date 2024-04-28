@@ -66,7 +66,7 @@ architecture Behavioral of DECSTAGE is
 			b   : out std_logic_vector(dataWidth-1 downto 0)
 		);
 	 end component;
-	 COMPONENT extendMSB
+	 COMPONENT cloud
     PORT(
          din : IN  std_logic_vector(15 downto 0);
          immed : OUT  std_logic_vector(31 downto 0)
@@ -83,6 +83,6 @@ begin
 		port map(a1 => instr(15 downto 11), a2 => instr(20 downto 16), sel => RF_B_sel, b => RF2S);
 	mux_wdata : mux2 generic map (dataWidth => 32)
 		port map(a1 => ALUOut, a2 => MEMOut, sel => RF_wData_sel, b => dataToWriteToRF);
-	extSign : extendMSB port map(din => instr(15 downto 0), immed => immed);
+	cloudUnit : cloud port map(din => instr(15 downto 0), immed => immed);
 end Behavioral;
 

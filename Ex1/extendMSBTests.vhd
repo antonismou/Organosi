@@ -32,14 +32,14 @@ USE ieee.std_logic_1164.ALL;
 -- arithmetic functions with Signed or Unsigned values
 --USE ieee.numeric_std.ALL;
  
-ENTITY extendMSBTests IS
-END extendMSBTests;
+ENTITY cloudTests IS
+END cloudTests;
  
-ARCHITECTURE behavior OF extendMSBTests IS 
+ARCHITECTURE behavior OF cloudTests IS 
  
     -- Component Declaration for the Unit Under Test (UUT)
  
-    COMPONENT extendMSB
+    COMPONENT cloud
     PORT(
          din : IN  std_logic_vector(15 downto 0);
          immed : OUT  std_logic_vector(31 downto 0)
