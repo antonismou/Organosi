@@ -35,11 +35,11 @@ PORT(
 	DINA : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
 	DOUTA : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
 	CLKA : IN STD_LOGIC;
-	WEA : in std_logic);
+	WEA : in std_logic_vector(0 downto 0));
 end component;
 
 begin
-	memory : memram port map(CLKA => clk, DINA => MEM_DataIn, DOUTA => MEM_DataOut, ADDRA => ALU_MEM_addr(11 downto 2), WEA => Mem_WrEn);
+	memory : memram port map(CLKA => clk, DINA => MEM_DataIn, DOUTA => MEM_DataOut, ADDRA => ALU_MEM_addr(11 downto 2), WEA(0) => Mem_WrEn);
 
 end Behavioral;
 
