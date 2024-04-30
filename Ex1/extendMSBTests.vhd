@@ -42,14 +42,15 @@ ARCHITECTURE behavior OF cloudTests IS
     COMPONENT cloud
     PORT(
          din : IN  std_logic_vector(15 downto 0);
-         immed : OUT  std_logic_vector(31 downto 0)
+         immed : OUT  std_logic_vector(31 downto 0);
+			ImmedControl: in STD_LOGIC_VECTOR(1 downto 0)
         );
     END COMPONENT;
     
 
    --Inputs
    signal din : std_logic_vector(15 downto 0) := (others => '0');
-
+	signal ImmedControl : std_logic_vector(1 downto 0) := (others => '0');
  	--Outputs
    signal immed : std_logic_vector(31 downto 0);
    -- No clocks detected in port list. Replace <clock> below with 
@@ -58,9 +59,10 @@ ARCHITECTURE behavior OF cloudTests IS
 BEGIN
  
 	-- Instantiate the Unit Under Test (UUT)
-   uut: extendMSB PORT MAP (
+   uut: cloud PORT MAP (
           din => din,
-          immed => immed
+          immed => immed,
+			 ImmedControl => ImmedControl
         );
  
 

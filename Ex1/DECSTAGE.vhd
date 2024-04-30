@@ -39,6 +39,7 @@ entity DECSTAGE is
            RF_B_sel : in  STD_LOGIC;
            clk : in  STD_LOGIC;
            immed : out  STD_LOGIC_VECTOR (31 downto 0);
+			  ImmedControl: in STD_LOGIC_VECTOR(1 downto 0);
            RF_A : out  STD_LOGIC_VECTOR (31 downto 0);
            RF_B : out  STD_LOGIC_VECTOR (31 downto 0));
 end DECSTAGE;
@@ -69,6 +70,7 @@ architecture Behavioral of DECSTAGE is
 	 COMPONENT cloud
     PORT(
          din : IN  std_logic_vector(15 downto 0);
+			ImmedControl: in STD_LOGIC_VECTOR(1 downto 0);
          immed : OUT  std_logic_vector(31 downto 0)
         );
     END COMPONENT;
@@ -83,6 +85,6 @@ begin
 		port map(a1 => instr(15 downto 11), a2 => instr(20 downto 16), sel => RF_B_sel, b => RF2S);
 	mux_wdata : mux2 generic map (dataWidth => 32)
 		port map(a1 => ALUOut, a2 => MEMOut, sel => RF_wData_sel, b => dataToWriteToRF);
-	cloudUnit : cloud port map(din => instr(15 downto 0), immed => immed);
+	cloudUnit : cloud port map(din => instr(15 downto 0), immed => immed, ImmedControl => ImmedControl);
 end Behavioral;
 

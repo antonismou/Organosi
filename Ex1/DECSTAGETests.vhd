@@ -50,6 +50,7 @@ ARCHITECTURE behavior OF DECSTAGETests IS
          RF_B_sel : IN  std_logic;
          clk : IN  std_logic;
          immed : OUT  std_logic_vector(31 downto 0);
+			ImmedControl: in STD_LOGIC_VECTOR(1 downto 0);
          RF_A : OUT  std_logic_vector(31 downto 0);
          RF_B : OUT  std_logic_vector(31 downto 0)
         );
@@ -58,6 +59,7 @@ ARCHITECTURE behavior OF DECSTAGETests IS
 
    --Inputs
    signal instr : std_logic_vector(31 downto 0) := (others => '0');
+	signal ImmedControl: STD_LOGIC_VECTOR(1 downto 0) := (others => '0');
 	signal rst : std_logic := '0';
    signal RF_we : std_logic := '0';
    signal ALUOut : std_logic_vector(31 downto 0) := (others => '0');
@@ -79,6 +81,7 @@ BEGIN
 	-- Instantiate the Unit Under Test (UUT)
    uut: DECSTAGE PORT MAP (
           instr => instr,
+			 ImmedControl => ImmedControl,
 			 rst => rst,
           RF_we => RF_we,
           ALUOut => ALUOut,
