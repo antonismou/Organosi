@@ -90,12 +90,17 @@ BEGIN
    stim_proc: process
    begin		
       -- hold reset state for 100 ns.
-		wait for 100 ns;	
+		wait for clk_period;	
 		PC_Immed <= "00000000000000000000000000000001";
       PC_sel <= '0'; 
       PC_LdEn <= '1';
       rst <= '1';	
-      wait for 100 ns;	
+		wait for clk_period*5;	
+		PC_Immed <= "00000000000000000000000000001000";
+      PC_sel <= '1'; 
+      PC_LdEn <= '1';
+      rst <= '0';	
+      wait for clk_period*5;		
       PC_Immed <= "00000000000000000000000000000001";
       PC_sel <= '0'; 
       PC_LdEn <= '1';
