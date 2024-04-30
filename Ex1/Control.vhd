@@ -44,8 +44,8 @@ entity Control is
 			aluFunc : out STD_LOGIC_VECTOR(3 downto 0);
         	rstOut : out  STD_LOGIC;
         	rst : in  STD_LOGIC;
-			clk: in STD_LOGIC);
-			immedControl: out STD_LOGIC_VECTOR(1 downto 0);
+			clk: in STD_LOGIC;
+			immedControl: out STD_LOGIC_VECTOR(1 downto 0));
 end Control;
 
 architecture Behavioral of Control is
@@ -84,7 +84,7 @@ begin
 				rfWe <= '0';
 				rfWrDataSel <= '0';
 				rfBSel <= '0';
-				immedControl<="xx" --not in use
+				immedControl<="00"; --not in use
 				--------------
 				memWe <= '0';
 				--------------
@@ -96,7 +96,7 @@ begin
 				-------------
 				rfWe <= '1';
 				rfWrDataSel <= '0';
-				immedControl<="xx" --not in use
+				immedControl<="XX"; --not in use
 				rfBSel <= '0';
 				--------------
 				aluBinSel <= '0';
@@ -110,7 +110,7 @@ begin
 				rfWe <= '1';
 				rfWrDataSel <= '0';
 				rfBSel <= '1';
-				immedControl<="01" --sign extension
+				immedControl<="01"; --sign extension
 				-------------
 				aluBinSel <= '1'; --choose immed
 				aluFunc <= "0000"; --rd +immed
@@ -123,7 +123,7 @@ begin
 				rfWe <= '1';
 				rfWrDataSel <= '0';
 				rfBSel <= '1';
-				immedControl<="10" --sign extension
+				immedControl<="10"; --sign extension
 				-------------
 				aluBinSel <= '1'; --choose immed
 				aluFunc <= "0000"; --rd +immed
@@ -136,10 +136,10 @@ begin
 				rfWe <= '1';
 				rfWrDataSel <= '0';
 				rfBSel <= '1';
-				immedControl<="01" --sign extension
+				immedControl<="01"; --sign extension
 				-------------
 				aluBinSel <= '1'; --choose immed
-				aluFunc <= instr(3 downto 0);; --rd +immed
+				aluFunc <= instr(3 downto 0); --rd +immed
 				-------------
 				memWe <= '0';
 			when andi =>
@@ -149,10 +149,10 @@ begin
 				rfWe <= '1';
 				rfWrDataSel <= '0';
 				rfBSel <= '1';
-				immedControl<="00" --sign extension
+				immedControl<="00"; --sign extension
 				-------------
 				aluBinSel <= '1'; --choose immed
-				aluFunc <= instr(3 downto 0);; 
+				aluFunc <= instr(3 downto 0);
 				-------------
 				memWe <= '0';
 			when ori =>
@@ -162,22 +162,22 @@ begin
 				rfWe <= '1';
 				rfWrDataSel <= '0';
 				rfBSel <= '1';
-				immedControl<="00" --sign extension
+				immedControl<="00"; --sign extension
 				-------------
 				aluBinSel <= '1'; --choose immed
-				aluFunc <= instr(3 downto 0);; 
+				aluFunc <= instr(3 downto 0);
 				memWe <= '0';
 			when b =>
 				pcSel <= '1';
 				pcLdEn <= '1';
 				-------------
 				rfWe <= '0';
-				rfWrDataSel <= 'x';
+				rfWrDataSel <= 'X';
 				rfBSel <= '1';
-				immedControl<="11" --sign extension
+				immedControl<="11"; --sign extension
 				-------------
-				aluBinSel <= 'x'; --choose immed
-				aluFunc <= "xxxx"; -- no use
+				aluBinSel <= 'X'; --choose immed
+				aluFunc <= "XXXX"; -- no use
 				------------
 				memWe <= '0';
 			when beq =>
@@ -189,9 +189,9 @@ begin
 				pcLdEn <= '1';
 				-------------
 				rfWe <= '0';
-				rfWrDataSel <= 'x';
+				rfWrDataSel <= 'X';
 				rfBSel <= '1';
-				immedControl<="11" --sign extension
+				immedControl<="11"; --sign extension
 				-------------
 				aluBinSel <= '0'; --choose immed
 				aluFunc <= "0001"; -- no use
@@ -206,9 +206,9 @@ begin
 				pcLdEn <= '1';
 				-------------
 				rfWe <= '0';
-				rfWrDataSel <= 'x';
+				rfWrDataSel <= 'X';
 				rfBSel <= '1';
-				immedControl<="11" --sign extension
+				immedControl<="11"; --sign extension
 				-------------
 				aluBinSel <= '0'; --choose immed
 				aluFunc <= "0001"; -- no use
@@ -221,7 +221,7 @@ begin
 				rfWe <= '1';
 				rfWrDataSel <= '1';
 				rfBSel <= '1';
-				immedControl<="01" --sign extension
+				immedControl<="01"; --sign extension
 				-------------
 				aluBinSel <= '1'; --choose immed
 				aluFunc <= "0000"; -- no use
@@ -232,9 +232,9 @@ begin
 				pcLdEn <= '1';
 				-------------
 				rfWe <= '0';
-				rfWrDataSel <= 'x';
+				rfWrDataSel <= 'X';
 				rfBSel <= '1';
-				immedControl<="01" --sign extension
+				immedControl<="01"; --sign extension
 				-------------
 				aluBinSel <= '1'; --choose immed
 				aluFunc <= "0000"; -- no use
@@ -247,7 +247,7 @@ begin
 				rfWe <= '0';
 				rfWrDataSel <= '0';
 				rfBSel <= '0';
-				immedControl<="00" 
+				immedControl<="00"; 
 				-------------
 				aluBinSel <= '0'; 
 				aluFunc <= "0000"; 
