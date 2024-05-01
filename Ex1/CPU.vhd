@@ -48,6 +48,7 @@ COMPONENT Datapath
            Zero : out std_logic;
            Ovf : out std_logic;
            Cout : out std_logic;
+			  ImmedControl: in STD_LOGIC_VECTOR(1 downto 0);
 			  instr : out  STD_LOGIC_VECTOR (31 downto 0));
     END COMPONENT;
 COMPONENT Control
@@ -65,17 +66,19 @@ COMPONENT Control
 			aluFunc : out STD_LOGIC_VECTOR(3 downto 0);
         	rstOut : out  STD_LOGIC;
         	rst : in  STD_LOGIC;
+			immedControl: out STD_LOGIC_VECTOR(1 downto 0);
 			clk: in STD_LOGIC);
 	END COMPONENT;
 	signal pcSelS,pcLdEnS,rfWeS,rfBSelS,rfWrDataSelS,memWeS,aluBinSelS,zeroS,ovfS,coutS: std_logic;
+	signal immedCS: std_logic_vector(1 downto 0);
 	signal aluFuncS : std_logic_vector(3 downto 0);
 	signal instrS : std_logic_vector(31 downto 0);
 begin
 	cpu_controler: control port map(instr => instrS,zero => zeroS, ovf=> ovfS, cout => coutS, pcSel => pcSelS,
-		pcLdEn => pcLdEnS, rfWe => rfWeS, rfBSel => rfBSelS, rfWrDataSel => rfWrDataSelS, memWe=> memWeS,
+		pcLdEn => pcLdEnS, rfWe => rfWeS, rfBSel => rfBSelS, rfWrDataSel => rfWrDataSelS, memWe=> memWeS,immedControl=>immedCS,
 		aluBinSel => aluBinSelS, aluFunc => aluFuncS, rst => rst, clk => clk);
 	cpu_datapath: datapath port map(instr => instrS,Zero => zeroS, Ovf=> ovfS, Cout => coutS, pcSel => pcSelS,
-		pcLdEn => pcLdEnS, RFWe => rfWeS, RF_B_Sel => rfBSelS, RFWrData => rfWrDataSelS, WeMem=> memWeS,
+		pcLdEn => pcLdEnS, RFWe => rfWeS, RF_B_Sel => rfBSelS, RFWrData => rfWrDataSelS, WeMem=> memWeS, ImmedControl=>immedCS,
 		ALU_Bin_Sel => aluBinSelS, ALU_Func => aluFuncS, rst => rst, clk => clk);
 
 end Behavioral;
