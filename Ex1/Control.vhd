@@ -54,7 +54,7 @@ type fsmStates is (rtype,li,lui,addi,andi,ori,b,beq,bne,lb,lw,sb,sw,idle,afterB)
 signal state,nextState : fsmStates;
 
 begin
-	findState : process(instr)
+	findState : process(instr,clk)
 	begin
 	if rst = '1' then
 			state <= idle;
