@@ -50,32 +50,40 @@ entity Control is
 end Control;
 
 architecture Behavioral of Control is
-type fsmStates is (rtype,li,lui,addi,andi,ori,b,beq,bne,lb,lw,sb,sw,idle);
-signal state : fsmStates;
+type fsmStates is (rtype,li,lui,addi,andi,ori,b,beq,bne,lb,lw,sb,sw,idle,afterB);
+signal state,nextState : fsmStates;
 
 begin
 	findState : process(instr)
 	begin
-		case instr(31 downto 26) is
-			when "100000" => state <= rtype;
-			when "111000" => state <= li;	
-			when "111001" => state <= lui;
-			when "110000" => state <= addi;
-			when "110010" => state <= andi;
-			when "110011" => state <= ori;
-			when "111111" => state <= b;
-			when "010000" => state <= beq;
-			when "010001" => state <= bne;
-			when "000011" => state <= lb;
-			when "001111" => state <= lw;
-			when "000111" => state <= sb;
-			when "011111" => state <= sw;
-			when others => state <= idle;
+	if rst = '1' then
+			state <= idle;
+	else 
+		case nextState is
+		when afterB => state <= afterB;
+		when others =>
+			case instr(31 downto 26) is
+				when "100000" => state <= rtype;
+				when "111000" => state <= li;	
+				when "111001" => state <= lui;
+				when "110000" => state <= addi;
+				when "110010" => state <= andi;
+				when "110011" => state <= ori;
+				when "111111" => state <= b;
+				when "010000" => state <= beq;
+				when "010001" => state <= bne;
+				when "000011" => state <= lb;
+				when "001111" => state <= lw;
+				when "000111" => state <= sb;
+				when "011111" => state <= sw;
+				when others => state <= idle;
+			end case;
 		end case;
+	end if;
 	end process;
 	
 	
-	output: process(state)
+	output: process(state,zero)
 	begin
 		case state is
 			when idle =>
@@ -92,6 +100,7 @@ begin
 				--------------
 				aluBinSel <= '0';
 				aluFunc <= "0000";
+				nextState <= idle; --don't care just different from afterB
 			when rtype => 
 				pcSel <= '0';
 				pcLdEn <= '1';
@@ -106,6 +115,7 @@ begin
 				--------------
 				memWe <= '0';
 				selMem <= 'X';
+				nextState <= idle; --don't care just different from afterB
 			when li =>
 				pcSel <= '0';
 				pcLdEn <= '1';
@@ -120,6 +130,7 @@ begin
 				-------------
 				memWe <= '0';
 				selMem <= 'X';
+				nextState <= idle; --don't care just different from afterB
 			when lui =>
 				pcSel <= '0';
 				pcLdEn <= '1';
@@ -134,6 +145,7 @@ begin
 				-------------
 				memWe <= '0';
 				selMem <= 'X';
+				nextState <= idle; --don't care just different from afterB
 			when addi =>
 				pcSel <= '0';
 				pcLdEn <= '1';
@@ -148,6 +160,7 @@ begin
 				-------------
 				memWe <= '0';
 				selMem <= 'X';
+				nextState <= idle; --don't care just different from afterB
 			when andi =>
 				pcSel <= '0';
 				pcLdEn <= '1';
@@ -162,6 +175,7 @@ begin
 				-------------
 				memWe <= '0';
 				selMem <= 'X';
+				nextState <= idle; --don't care just different from afterB
 			when ori =>
 				pcSel <= '0';
 				pcLdEn <= '1';
@@ -175,6 +189,7 @@ begin
 				aluFunc <= "0011"; 
 				memWe <= '0';
 				selMem <= 'X';
+				nextState <= idle; --don't care just different from afterB
 			when b =>
 				pcSel <= '1';
 				pcLdEn <= '1';
@@ -189,11 +204,14 @@ begin
 				------------
 				memWe <= '0';
 				selMem <= 'X';
+				nextState <= afterB; 
 			when beq =>
-				if zero = '0' then
-					pcSel <= '0';
-				else
+				if zero = '1' then
 					pcSel <= '1';
+					nextState <= afterB;
+				else
+					pcSel <= '0';
+					nextState <= idle;--don't care just different from afterB
 				end if;
 				pcLdEn <= '1';
 				-------------
@@ -202,16 +220,18 @@ begin
 				rfBSel <= '1';
 				immedControl<="11"; 
 				-------------
-				aluBinSel <= 'X'; 
-				aluFunc <= "XXXX"; 
+				aluBinSel <= '0'; 
+				aluFunc <= "0001"; 
 				------------
 				memWe <= '0';
 				selMem <= 'X';
 			when bne =>
 				if zero = '1' then
 					pcSel <= '0';
+					nextState <= idle; --don't care just different from afterB
 				else
 					pcSel <= '1';
+					nextState <= afterB;
 				end if;
 				pcLdEn <= '1';
 				-------------
@@ -220,8 +240,8 @@ begin
 				rfBSel <= '1';
 				immedControl<="11";
 				-------------
-				aluBinSel <= 'X'; 
-				aluFunc <= "XXXX"; 
+				aluBinSel <= '0'; 
+				aluFunc <= "0001"; 
 				------------
 				memWe <= '0';
 				selMem <= 'X';
@@ -239,6 +259,7 @@ begin
 				------------
 				memWe <= '0';	
 				selMem <= '0';
+				nextState <= idle; --don't care just different from afterB
 			when lw =>
 				pcSel <= '0';
 				pcLdEn <= '1';
@@ -253,6 +274,7 @@ begin
 				------------
 				memWe <= '0';	
 				selMem <= 'X';
+				nextState <= idle; --don't care just different from afterB
 			when sb | sw =>
 				pcSel <= '0';
 				pcLdEn <= '1';
@@ -267,9 +289,10 @@ begin
 				------------
 				memWe <= '1';
 				selMem <= 'X';
+				nextState <= idle; --don't care just different from afterB
 			when others => 
 				pcSel <= '0';
-				pcLdEn <= '1';
+				pcLdEn <= '0';
 				-------------
 				rfWe <= '0';
 				rfWrDataSel <= '0';
@@ -281,6 +304,7 @@ begin
 				------------
 				memWe <= '0';	
 				selMem <= 'X';
+				nextState <= idle; --don't care just different from afterB
 			end case;
 	end process;
 end Behavioral;
