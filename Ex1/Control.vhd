@@ -45,7 +45,8 @@ entity Control is
         	rstOut : out  STD_LOGIC;
         	rst : in  STD_LOGIC;
 			clk: in STD_LOGIC;
-			immedControl: out STD_LOGIC_VECTOR(1 downto 0));
+			immedControl: out STD_LOGIC_VECTOR(1 downto 0);
+			selMem : out std_logic);
 end Control;
 
 architecture Behavioral of Control is
@@ -79,14 +80,15 @@ begin
 		case state is
 			when idle =>
 				pcSel <= '0';
-				pcLdEn <= '0';
+				pcLdEn <= '1';
 				--------------
 				rfWe <= '0';
 				rfWrDataSel <= '0';
 				rfBSel <= '0';
-				immedControl<="00"; --not in use
+				immedControl<="XX"; --not in use
 				--------------
 				memWe <= '0';
+				selMem <= 'X';
 				--------------
 				aluBinSel <= '0';
 				aluFunc <= "0000";
@@ -103,6 +105,7 @@ begin
 				aluFunc <= instr(3 downto 0);
 				--------------
 				memWe <= '0';
+				selMem <= 'X';
 			when li =>
 				pcSel <= '0';
 				pcLdEn <= '1';
@@ -116,6 +119,7 @@ begin
 				aluFunc <= "0000"; --rd +immed
 				-------------
 				memWe <= '0';
+				selMem <= 'X';
 			when lui =>
 				pcSel <= '0';
 				pcLdEn <= '1';
@@ -123,12 +127,13 @@ begin
 				rfWe <= '1';
 				rfWrDataSel <= '0';
 				rfBSel <= '1';
-				immedControl<="10"; --sign extension
+				immedControl<="10"; 
 				-------------
-				aluBinSel <= '1'; --choose immed
-				aluFunc <= "0000"; --rd +immed
+				aluBinSel <= '1'; 
+				aluFunc <= "0000"; 
 				-------------
 				memWe <= '0';
+				selMem <= 'X';
 			when addi =>
 				pcSel <= '0';
 				pcLdEn <= '1';
@@ -139,9 +144,10 @@ begin
 				immedControl<="01"; --sign extension
 				-------------
 				aluBinSel <= '1'; --choose immed
-				aluFunc <= instr(3 downto 0); --rd +immed
+				aluFunc <= "0000"; --rd +immed
 				-------------
 				memWe <= '0';
+				selMem <= 'X';
 			when andi =>
 				pcSel <= '0';
 				pcLdEn <= '1';
@@ -149,12 +155,13 @@ begin
 				rfWe <= '1';
 				rfWrDataSel <= '0';
 				rfBSel <= '1';
-				immedControl<="00"; --sign extension
+				immedControl<="00"; 
 				-------------
-				aluBinSel <= '1'; --choose immed
-				aluFunc <= instr(3 downto 0);
+				aluBinSel <= '1'; 
+				aluFunc <= "0010"; 
 				-------------
 				memWe <= '0';
+				selMem <= 'X';
 			when ori =>
 				pcSel <= '0';
 				pcLdEn <= '1';
@@ -162,11 +169,12 @@ begin
 				rfWe <= '1';
 				rfWrDataSel <= '0';
 				rfBSel <= '1';
-				immedControl<="00"; --sign extension
+				immedControl<="00"; 
 				-------------
-				aluBinSel <= '1'; --choose immed
-				aluFunc <= instr(3 downto 0);
+				aluBinSel <= '1'; 
+				aluFunc <= "0011"; 
 				memWe <= '0';
+				selMem <= 'X';
 			when b =>
 				pcSel <= '1';
 				pcLdEn <= '1';
@@ -174,12 +182,13 @@ begin
 				rfWe <= '0';
 				rfWrDataSel <= 'X';
 				rfBSel <= '1';
-				immedControl<="11"; --sign extension
+				immedControl<="11"; 
 				-------------
-				aluBinSel <= 'X'; --choose immed
-				aluFunc <= "XXXX"; -- no use
+				aluBinSel <= 'X'; 
+				aluFunc <= "XXXX"; 
 				------------
 				memWe <= '0';
+				selMem <= 'X';
 			when beq =>
 				if zero = '0' then
 					pcSel <= '0';
@@ -191,12 +200,13 @@ begin
 				rfWe <= '0';
 				rfWrDataSel <= 'X';
 				rfBSel <= '1';
-				immedControl<="11"; --sign extension
+				immedControl<="11"; 
 				-------------
-				aluBinSel <= '0'; --choose immed
-				aluFunc <= "0001"; -- no use
+				aluBinSel <= 'X'; 
+				aluFunc <= "XXXX"; 
 				------------
 				memWe <= '0';
+				selMem <= 'X';
 			when bne =>
 				if zero = '1' then
 					pcSel <= '0';
@@ -208,25 +218,41 @@ begin
 				rfWe <= '0';
 				rfWrDataSel <= 'X';
 				rfBSel <= '1';
-				immedControl<="11"; --sign extension
+				immedControl<="11";
 				-------------
-				aluBinSel <= '0'; --choose immed
-				aluFunc <= "0001"; -- no use
+				aluBinSel <= 'X'; 
+				aluFunc <= "XXXX"; 
 				------------
 				memWe <= '0';
-			when lb | lw =>
+				selMem <= 'X';
+			when lb =>
 				pcSel <= '0';
 				pcLdEn <= '1';
 				-------------
 				rfWe <= '1';
 				rfWrDataSel <= '1';
 				rfBSel <= '1';
-				immedControl<="01"; --sign extension
+				immedControl<="01";
 				-------------
-				aluBinSel <= '1'; --choose immed
-				aluFunc <= "0000"; -- no use
+				aluBinSel <= 'X'; 
+				aluFunc <= "XXXX"; 
 				------------
 				memWe <= '0';	
+				selMem <= '0';
+			when lw =>
+				pcSel <= '0';
+				pcLdEn <= '1';
+				-------------
+				rfWe <= '1';
+				rfWrDataSel <= '1';
+				rfBSel <= '1';
+				immedControl<="01"; 
+				-------------
+				aluBinSel <= 'X'; 
+				aluFunc <= "XXXX"; 
+				------------
+				memWe <= '0';	
+				selMem <= 'X';
 			when sb | sw =>
 				pcSel <= '0';
 				pcLdEn <= '1';
@@ -239,7 +265,8 @@ begin
 				aluBinSel <= '1'; --choose immed
 				aluFunc <= "0000"; -- no use
 				------------
-				memWe <= '1';	
+				memWe <= '1';
+				selMem <= 'X';
 			when others => 
 				pcSel <= '0';
 				pcLdEn <= '1';
@@ -253,9 +280,7 @@ begin
 				aluFunc <= "0000"; 
 				------------
 				memWe <= '0';	
+				selMem <= 'X';
 			end case;
 	end process;
 end Behavioral;
-
-
-

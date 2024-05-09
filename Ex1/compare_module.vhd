@@ -2,9 +2,9 @@
 -- Company: 
 -- Engineer: 
 -- 
--- Create Date:    09:53:59 04/10/2024 
+-- Create Date:    15:34:01 04/26/2024 
 -- Design Name: 
--- Module Name:    alu_and_or_not - Behavioral 
+-- Module Name:    compare_module - Behavioral 
 -- Project Name: 
 -- Target Devices: 
 -- Tool versions: 
@@ -19,6 +19,7 @@
 ----------------------------------------------------------------------------------
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
@@ -28,31 +29,40 @@ use IEEE.STD_LOGIC_1164.ALL;
 -- any Xilinx primitives in this code.
 --library UNISIM;
 --use UNISIM.VComponents.all;
+entity compare_module is
+	Port ( 
+		inp : in STD_LOGIC_VECTOR (4 downto 0);
+		inp2 : in  STD_LOGIC_VECTOR (4 downto 0);
+		we : in std_logic;
+		outp: out std_logic
+		 );
+end compare_module;
 
-entity alu_and_or_not is
-    Port ( A : in  STD_LOGIC_VECTOR (31 downto 0);
-           B : in  STD_LOGIC_VECTOR (31 downto 0);
-           Op : in  STD_LOGIC_VECTOR (3 downto 0);
-           Output : out  STD_LOGIC_VECTOR (31 downto 0);
-           Zero : out  STD_LOGIC;
-           Cout : out  STD_LOGIC;
-           Ovf : out  STD_LOGIC);
-end alu_and_or_not;
 
-architecture Behavioral of alu_and_or_not is
+architecture Behavioral of compare_module is
+
+	signal temp: std_logic; 
 
 begin
-	process(A,B,Op) is
+	process(inp,inp2,we)	
 	begin
-		Cout<='0';
-		Ovf<='0';
-		Zero<='0';
-		if Op="0010" then
-			Output<= (A and B);
-		elsif Op="0011" then
-			Output<= (A or B);
+		if(we='1') then	
+			if (inp = inp2) then
+				if(inp = "00000") then
+					temp <='0';
+				else
+					temp<= '1';
+				end if;
+			else
+				temp<= '0';
+			end if;
 		else
-			Output<= (not A);
-		end if;
+			temp <= '0';
+		end if;	
+		
 	end process;
+		 
+		outp <= temp;
+
 end Behavioral;
+

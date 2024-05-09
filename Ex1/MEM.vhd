@@ -31,15 +31,15 @@ end MEM;
 architecture Behavioral of MEM is
 component memram is
 PORT(
-	ADDRA : IN STD_LOGIC_VECTOR(9 DOWNTO 0);
-	DINA : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-	DOUTA : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
-	CLKA : IN STD_LOGIC;
-	WEA : in std_logic_vector(0 downto 0));
+	a : IN STD_LOGIC_VECTOR(9 DOWNTO 0);
+	d : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+	spo : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+	clk : IN STD_LOGIC;
+	we : in std_logic);
 end component;
 
 begin
-	memory : memram port map(CLKA => clk, DINA => MEM_DataIn, DOUTA => MEM_DataOut, ADDRA => ALU_MEM_addr(11 downto 2), WEA(0) => Mem_WrEn);
+	memory : memram port map(clk => clk, d => MEM_DataIn, spo => MEM_DataOut, a => ALU_MEM_addr(11 downto 2), we => Mem_WrEn);
 
 end Behavioral;
 
