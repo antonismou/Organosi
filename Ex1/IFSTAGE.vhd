@@ -20,6 +20,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
+
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
 --use IEEE.NUMERIC_STD.ALL;
@@ -46,16 +47,21 @@ architecture Behavioral of IFSTAGE is
 				b   : out std_logic_vector(31 downto 0));
 	end component;
 	
-	Component incrementor_4 is
-		 Port ( input : in  STD_LOGIC_VECTOR (31 downto 0);
-				  output : out  STD_LOGIC_VECTOR (31 downto 0));
-	end component;
-	
-	Component incrementor_immed is
-		Port ( input_incr_4 : in  STD_LOGIC_VECTOR (31 downto 0);
-				 immed : in  STD_LOGIC_VECTOR (31 downto 0);
-             output : out  STD_LOGIC_VECTOR (31 downto 0));
-	end component;
+--	Component incrementor_4 is
+--		 Port ( input : in  STD_LOGIC_VECTOR (31 downto 0);
+--				  output : out  STD_LOGIC_VECTOR (31 downto 0));
+--	end component;
+--	
+--	Component incrementor_immed is
+--		Port ( input_incr_4 : in  STD_LOGIC_VECTOR (31 downto 0);
+--				 immed : in  STD_LOGIC_VECTOR (31 downto 0);
+--             output : out  STD_LOGIC_VECTOR (31 downto 0));
+--	end component;
+	Component incrementor is
+		Port( a:in  STD_LOGIC_VECTOR (31 downto 0);
+				b:in  STD_LOGIC_VECTOR (31 downto 0);
+				output: out  STD_LOGIC_VECTOR (31 downto 0));
+	end Component;
 	
 	Component reg is
 	Port ( clk : in  STD_LOGIC;
@@ -77,11 +83,16 @@ signal reg_out: STD_LOGIC_VECTOR (31 DOWNTO 0);
 signal incrementor_out: STD_LOGIC_VECTOR (31 DOWNTO 0);
 begin
 
-incrementor4 : incrementor_4 port map (
-	input=>reg_out, output=>incrementor_4_out);
-
-incrementorImmed: incrementor_immed port map(
-	input_incr_4=>incrementor_4_out, immed=>Pc_Immed, output=>incrementor_out);
+--incrementor4 : incrementor_4 port map (
+--	input=>reg_out, output=>incrementor_4_out);
+--
+--incrementorImmed: incrementor_immed port map(
+--	input_incr_4=>incrementor_4_out, immed=>Pc_Immed, output=>incrementor_out);
+incr_4: incrementor port map(
+	a=>reg_out, b=>x"00000004",output=>incrementor_4_out);
+	
+incr_immed: incrementor port map(
+	a=>incrementor_4_out, b=>PC_Immed,output=>incrementor_out);
 	
 mux: mux2 port map(
 	a1=>incrementor_4_out,a2=>incrementor_out,sel=>PC_sel,b=>mux2_out);

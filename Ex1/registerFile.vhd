@@ -95,40 +95,74 @@ architecture Behavioral of registerFile is
         );
     END COMPONENT mux32;
 	 
+	 COMPONENT mux2
+    PORT(
+         a1 : IN  std_logic_vector(31 downto 0);
+         a2 : IN  std_logic_vector(31 downto 0);
+         sel : IN  std_logic;
+         b : OUT  std_logic_vector(31 downto 0)
+        );
+    END COMPONENT mux2;
+	 
 	 component decoder5to32 is
     Port ( din : in  STD_LOGIC_VECTOR (4 downto 0); dout : out STD_LOGIC_VECTOR (31 downto 0));
 	 end component decoder5to32;
 	 
+	COMPONENT compare_module
+	PORT (
+			inp : IN STD_LOGIC_VECTOR (4 downto 0);
+			inp2 : IN STD_LOGIC_VECTOR (4 downto 0);
+			we : IN  std_logic;
+			outp: OUT  std_logic);
+	END COMPONENT;
+	 
 	signal weS : STD_LOGIC_VECTOR(31 downto 0);		--signal for we for registers
-	
+	signal muxout1S,muxout2S : STD_LOGIC_VECTOR(31 downto 0);
 	type dout_type is array (31 downto 0) of STD_LOGIC_VECTOR(31 downto 0);		--signal for every register for the dout
 	signal doutS :	dout_type ;
 	signal decoderOut : STD_LOGIC_VECTOR (31 downto 0);
+	signal comp_mod_out1S,comp_mod_out2S: std_logic;
 begin
+	regs: reg0 port map(clk => clk, rst => rst, we => weS(0), data => din, dout => doutS(0));
+
 	gen_reg: for i in 1 to 31 generate
 	regs: reg port map(clk => clk, rst => rst, we => weS(i), data => din, dout => doutS(i));
 	end generate gen_reg;
+
+	comp1: compare_module PORT MAP (
+				inp => addrw,
+				inp2 => addr1,
+				we => we,
+				outp => comp_mod_out1S
+			);
+			
+	comp2: compare_module PORT MAP (
+				inp => addrw,
+				inp2 => addr2,
+				we => we,
+				outp => comp_mod_out2S
+			);
 	
-	regs: reg0 port map(clk => clk, rst => rst, we => weS(0), data => din, dout => doutS(0));
-	
-	mux1 : mux32 port map(
+	mux_1 : mux32 port map(
 		a1 => doutS(0),a2 => doutS(1),a3 => doutS(2),a4 => doutS(3),a5 => doutS(4),a6 => doutS(5),
 		a7 => doutS(6),a8 => doutS(7),a9 => doutS(8),a10 => doutS(9),a11 => doutS(10),a12 => doutS(11),
 		a13 => doutS(12),a14 => doutS(13),a15 => doutS(14),a16 => doutS(15),a17 => doutS(16),a18 => doutS(17),
 		a19 => doutS(18),a20 => doutS(19),a21 => doutS(20),a22 => doutS(21),a23 => doutS(22),a24 => doutS(23),
 		a25 => doutS(24),a26 => doutS(25),a27 => doutS(26),a28 => doutS(27),a29 => doutS(28),a30 => doutS(29),
-		a31 => doutS(30),a32 => doutS(31),sel => addr1,b => dout1);
+		a31 => doutS(30),a32 => doutS(31),sel => addr1,b => muxout1S);
 	
-	mux2 : mux32 port map(
+	mux_2 : mux32 port map(
 		a1 => doutS(0),a2 => doutS(1),a3 => doutS(2),a4 => doutS(3),a5 => doutS(4),a6 => doutS(5),
 		a7 => doutS(6),a8 => doutS(7),a9 => doutS(8),a10 => doutS(9),a11 => doutS(10),a12 => doutS(11),
 		a13 => doutS(12),a14 => doutS(13),a15 => doutS(14),a16 => doutS(15),a17 => doutS(16),a18 => doutS(17),
 		a19 => doutS(18),a20 => doutS(19),a21 => doutS(20),a22 => doutS(21),a23 => doutS(22),a24 => doutS(23),
 		a25 => doutS(24),a26 => doutS(25),a27 => doutS(26),a28 => doutS(27),a29 => doutS(28),a30 => doutS(29),
-		a31 => doutS(30),a32 => doutS(31),sel => addr2,b => dout2);
+		a31 => doutS(30),a32 => doutS(31),sel => addr2,b => muxout2S);
 	
+	mux_comp_1 : mux2 port map(a1 => muxout1S, a2 => din, sel => comp_mod_out1S, b => dout1);
+	mux_comp_2 : mux2 port map(a1 => muxout2S, a2 => din, sel => comp_mod_out2S, b => dout2);
 	decoder : decoder5to32 port map(din => addrw, dout => decoderOut);
-	
+
 	process(we,decoderOut)
 	begin
 		for i in 0 to 31 loop

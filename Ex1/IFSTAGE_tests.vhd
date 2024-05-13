@@ -96,7 +96,7 @@ BEGIN
       PC_LdEn <= '1';
       rst <= '1';	
 		wait for clk_period*5;	
-		PC_Immed <= "00000000000000000000000000001000";
+		PC_Immed <= "00000000000000000000000000000001";
       PC_sel <= '1'; 
       PC_LdEn <= '1';
       rst <= '0';	

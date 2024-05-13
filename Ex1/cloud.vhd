@@ -51,11 +51,10 @@ case ImmedControl is
 	-- Zero Fill & Shift
 	when "10" =>
 		immed <= din & (31 downto 16 => '0'); 
-	-- Sign Extend and shift
+	-- Sign Extend and shift by 2
 	when others =>
-		immed <= std_logic_vector(shift_left(unsigned(resize(signed(din), 32)), 2));
+		immed <= std_logic_vector(shift_left(signed(resize(signed(din), 32)), 2));
 end case;
 end process;
 
 end Behavioral;
-

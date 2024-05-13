@@ -2,15 +2,15 @@
 -- Company: 
 -- Engineer:
 --
--- Create Date:   21:58:53 04/14/2024
+-- Create Date:   01:01:05 04/12/2024
 -- Design Name:   
--- Module Name:   /home/manos/Documents/organosh/EX1V1/incrementroImmed_tests.vhd
--- Project Name:  EX1V1
+-- Module Name:   /home/ise/Organosi/Ex1V3/extendMSBTests.vhd
+-- Project Name:  Ex1V3
 -- Target Device:  
 -- Tool versions:  
 -- Description:   
 -- 
--- VHDL Test Bench Created by ISE for module: incrementor_immed
+-- VHDL Test Bench Created by ISE for module: extendMSB
 -- 
 -- Dependencies:
 -- 
@@ -32,50 +32,38 @@ USE ieee.std_logic_1164.ALL;
 -- arithmetic functions with Signed or Unsigned values
 --USE ieee.numeric_std.ALL;
  
-ENTITY incrementroImmed_tests IS
-END incrementroImmed_tests;
+ENTITY cloudTests IS
+END cloudTests;
  
-ARCHITECTURE behavior OF incrementroImmed_tests IS 
+ARCHITECTURE behavior OF cloudTests IS 
  
     -- Component Declaration for the Unit Under Test (UUT)
  
-    COMPONENT incrementor_immed
+    COMPONENT cloud
     PORT(
-         input_incr_4 : IN  std_logic_vector(31 downto 0);
-         immed : IN  std_logic_vector(31 downto 0);
-         output : OUT  std_logic_vector(31 downto 0)
+         din : IN  std_logic_vector(15 downto 0);
+         immed : OUT  std_logic_vector(31 downto 0);
+			ImmedControl: in STD_LOGIC_VECTOR(1 downto 0)
         );
     END COMPONENT;
     
 
    --Inputs
-   signal input_incr_4 : std_logic_vector(31 downto 0) := (others => '0');
-   signal immed : std_logic_vector(31 downto 0) := (others => '0');
-
+   signal din : std_logic_vector(15 downto 0) := (others => '0');
+	signal ImmedControl : std_logic_vector(1 downto 0) := (others => '0');
  	--Outputs
-   signal output : std_logic_vector(31 downto 0);
+   signal immed : std_logic_vector(31 downto 0);
    -- No clocks detected in port list. Replace <clock> below with 
    -- appropriate port name 
- 
---   constant <clock>_period : time := 10 ns;
  
 BEGIN
  
 	-- Instantiate the Unit Under Test (UUT)
-   uut: incrementor_immed PORT MAP (
-          input_incr_4 => input_incr_4,
+   uut: cloud PORT MAP (
+          din => din,
           immed => immed,
-          output => output
+			 ImmedControl => ImmedControl
         );
-
-   -- Clock process definitions
---   <clock>_process :process
---   begin
---		<clock> <= '0';
---		wait for <clock>_period/2;
---		<clock> <= '1';
---		wait for <clock>_period/2;
---   end process;
  
 
    -- Stimulus process
@@ -83,12 +71,17 @@ BEGIN
    begin		
       -- hold reset state for 100 ns.
       wait for 100 ns;	
-		input_incr_4<= x"00000004";
-		immed<=x"00000007";
-		
-      wait for 100 ns;
-		
-
+		din <= x"0001";
+		ImmedControl<="00";
+		wait for 100 ns;
+		din <= x"0001";
+		ImmedControl<="01";
+		wait for 100 ns;
+		din <= x"0001";
+		ImmedControl<="10";
+		wait for 100 ns;
+		din <= x"0001";
+		ImmedControl<="11";
       -- insert stimulus here 
 
       wait;

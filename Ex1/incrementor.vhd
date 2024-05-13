@@ -2,9 +2,9 @@
 -- Company: 
 -- Engineer: 
 -- 
--- Create Date:    19:03:00 04/14/2024 
+-- Create Date:    11:34:43 05/09/2024 
 -- Design Name: 
--- Module Name:    incrementor_immed - Behavioral 
+-- Module Name:    incrementor - Behavioral 
 -- Project Name: 
 -- Target Devices: 
 -- Tool versions: 
@@ -30,22 +30,16 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 --library UNISIM;
 --use UNISIM.VComponents.all;
 
-entity incrementor_immed is
-	Port ( input_incr_4 : in  STD_LOGIC_VECTOR (31 downto 0);
-           immed : in  STD_LOGIC_VECTOR (31 downto 0);
+entity incrementor is
+    Port ( a : in  STD_LOGIC_VECTOR (31 downto 0);
+           b : in  STD_LOGIC_VECTOR (31 downto 0);
            output : out  STD_LOGIC_VECTOR (31 downto 0));
-end incrementor_immed;
+end incrementor;
 
-architecture Behavioral of incrementor_immed is
---	component incrementor_4 is
---		Port ( input : in  STD_LOGIC_VECTOR (31 downto 0);
---				 output : out  STD_LOGIC_VECTOR (31 downto 0));	
---	end component;
+architecture Behavioral of incrementor is
+
 begin
---	incrementor_4: incrementor_4 port map (
---		input=>in
-	--output<= input_incr_4 + (immed(29 downto 0) & "00");
-	output<= input_incr_4 + immed;
+	output<= a+b;
 
 end Behavioral;
 

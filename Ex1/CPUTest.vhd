@@ -2,15 +2,15 @@
 -- Company: 
 -- Engineer:
 --
--- Create Date:   17:59:04 04/16/2024
+-- Create Date:   05:15:53 05/04/2024
 -- Design Name:   
--- Module Name:   /home/ise/Organosi/Ex1V3/DatapathTests.vhd
--- Project Name:  Ex1V3
+-- Module Name:   /home/ise/Organosi/Ex1V8/CPUTest.vhd
+-- Project Name:  Ex1V8
 -- Target Device:  
 -- Tool versions:  
 -- Description:   
 -- 
--- VHDL Test Bench Created by ISE for module: Datapath
+-- VHDL Test Bench Created by ISE for module: CPU
 -- 
 -- Dependencies:
 -- 
@@ -32,20 +32,17 @@ USE ieee.std_logic_1164.ALL;
 -- arithmetic functions with Signed or Unsigned values
 --USE ieee.numeric_std.ALL;
  
-ENTITY DatapathTests IS
-END DatapathTests;
+ENTITY CPUTest IS
+END CPUTest;
  
-ARCHITECTURE behavior OF DatapathTests IS 
+ARCHITECTURE behavior OF CPUTest IS 
  
     -- Component Declaration for the Unit Under Test (UUT)
  
-    COMPONENT Datapath
+    COMPONENT CPU
     PORT(
          clk : IN  std_logic;
-         rst : IN  std_logic;
-         pcImmed : IN  std_logic_vector(31 downto 0);
-         pcSel : IN  std_logic;
-         pcLdEn : IN  std_logic
+         rst : IN  std_logic
         );
     END COMPONENT;
     
@@ -53,9 +50,6 @@ ARCHITECTURE behavior OF DatapathTests IS
    --Inputs
    signal clk : std_logic := '0';
    signal rst : std_logic := '0';
-   signal pcImmed : std_logic_vector(31 downto 0) := (others => '0');
-   signal pcSel : std_logic := '0';
-   signal pcLdEn : std_logic := '0';
 
    -- Clock period definitions
    constant clk_period : time := 10 ns;
@@ -63,12 +57,9 @@ ARCHITECTURE behavior OF DatapathTests IS
 BEGIN
  
 	-- Instantiate the Unit Under Test (UUT)
-   uut: Datapath PORT MAP (
+   uut: CPU PORT MAP (
           clk => clk,
-          rst => rst,
-          pcImmed => pcImmed,
-          pcSel => pcSel,
-          pcLdEn => pcLdEn
+          rst => rst
         );
 
    -- Clock process definitions
@@ -84,12 +75,9 @@ BEGIN
    -- Stimulus process
    stim_proc: process
    begin		
-      -- hold reset state for 100 ns.
+      rst<= '1';
       wait for 100 ns;	
-		pcImmed <= '0';
-		pcSel <= '0';
-		rst <= '0';
-		pcLdEn <= '1';
+		rst<= '0';
       wait for clk_period*10;
 
       -- insert stimulus here 

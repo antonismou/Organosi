@@ -44,7 +44,8 @@ entity Datapath is
            Ovf : out std_logic;
            Cout : out std_logic;
 			  ImmedControl: in STD_LOGIC_VECTOR(1 downto 0);
-			  instr : out  STD_LOGIC_VECTOR (31 downto 0));
+			  instr : out  STD_LOGIC_VECTOR (31 downto 0);
+			  selMem : in std_logic);
 end Datapath;
 
 architecture Behavioral of Datapath is
@@ -58,19 +59,19 @@ COMPONENT IFSTAGE
          Instr : OUT  std_logic_vector(31 downto 0));
     END COMPONENT;
 COMPONENT DECSTAGE
-    PORT(
-         instr : IN  std_logic_vector(31 downto 0);
-			rst: in std_logic;
-         RF_we : IN  std_logic;
-         ALUOut : IN  std_logic_vector(31 downto 0);
-         MEMOut : IN  std_logic_vector(31 downto 0);
-         RF_wData_sel : IN  std_logic;
-         RF_B_sel : IN  std_logic;
-         clk : IN  std_logic;
-         immed : OUT  std_logic_vector(31 downto 0);
-			ImmedControl: in STD_LOGIC_VECTOR(1 downto 0);
-         RF_A : OUT  std_logic_vector(31 downto 0);
-         RF_B : OUT  std_logic_vector(31 downto 0));
+    Port ( instr : in  STD_LOGIC_VECTOR (31 downto 0);
+			  rst : in std_logic;
+           RF_we : in  STD_LOGIC;
+           ALUOut : in  STD_LOGIC_VECTOR (31 downto 0);
+           MEMOut : in  STD_LOGIC_VECTOR (31 downto 0);
+           RF_wData_sel : in  STD_LOGIC;
+           RF_B_sel : in  STD_LOGIC;
+           clk : in  STD_LOGIC;
+           immed : out  STD_LOGIC_VECTOR (31 downto 0);
+			  ImmedControl: in STD_LOGIC_VECTOR(1 downto 0);
+           RF_A : out  STD_LOGIC_VECTOR (31 downto 0);
+           RF_B : out  STD_LOGIC_VECTOR (31 downto 0);
+			  selMem : in std_logic);
     END COMPONENT;
 COMPONENT ALU_ex
     PORT(
@@ -96,11 +97,10 @@ begin
 InsFetch: IFSTAGE port map(PC_Immed => immedS, PC_sel => pcSel, PC_LdEn => pcLdEn, rst => RST, clk => clk, Instr => instrS);
 Decoder: DECSTAGE port map(
 	instr => instrS, rst => rst, clk => clk, RF_we => RFWe, ALUOut => AluOutS, MEMOut => MemOutS, RF_B_sel => RF_B_sel,
-	RF_wData_sel => RFWrData, immed => immedS, RF_A => RFA, RF_B => RFB, ImmedControl => ImmedControl);
+	RF_wData_sel => RFWrData, immed => immedS, RF_A => RFA, RF_B => RFB, ImmedControl => ImmedControl, selMem=> selMem);
 AlU: ALU_ex port map(RF_A => RFA, RF_B => RFB, immed => immedS, ALU_Bin_sel => ALU_Bin_sel,
 	ALU_Func => ALU_Func , ALU_out => AluOutS, Zero=> Zero, Ovf => Ovf, Cout => Cout);
 MEMO : MEM port map(clk => clk, Mem_WrEn => WeMem , ALU_MEM_addr => AluOutS, MEM_DataOut => MemOutS, MEM_DataIn =>RFB);
---WeMemS <= ((not instrS(31)) and (not instrS(30)) and (not instrS(29)) and instrS(28)) or
---			 ((not instrS(31)) and instrS(30) and instrS(29) and instrS(28));
+
 instr<= instrS;
 end Behavioral;
