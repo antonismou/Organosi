@@ -30,11 +30,12 @@ use IEEE.STD_LOGIC_1164.ALL;
 --use UNISIM.VComponents.all;
 
 entity reg is
-    Port ( clk : in  STD_LOGIC;
-			  rst : STD_LOGIC;
-           we : in  STD_LOGIC;
-           data : in  STD_LOGIC_VECTOR (31 downto 0);
-           dout : out  STD_LOGIC_VECTOR (31 downto 0));
+	generic(dataWidth: integer := 32);
+   Port ( clk : in  STD_LOGIC;
+			 rst : STD_LOGIC;
+          we : in  STD_LOGIC;
+          data : in  STD_LOGIC_VECTOR (dataWidth-1 downto 0);
+          dout : out  STD_LOGIC_VECTOR (dataWidth-1 downto 0));
 end reg;
 
 architecture Behavioral of reg is
@@ -44,7 +45,7 @@ begin
 	begin
 		WAIT UNTIL clk'EVENT AND clk = '1';
 		if rst = '1' then
-			dout <= x"00000000";
+			dout <= (others => '0');
 		else
 			if we = '1' then
 				dout <= data;

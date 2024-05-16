@@ -41,12 +41,13 @@ ARCHITECTURE behavior OF regTests IS
     -- Component Declaration for the Unit Under Test (UUT)
  
     COMPONENT reg
+	 generic(dataWidth: integer := 32);
     PORT(
          clk : IN  std_logic;
          rst : IN  std_logic;
          we : IN  std_logic;
-         data : IN  std_logic_vector(31 downto 0);
-         dout : OUT  std_logic_vector(31 downto 0)
+         data : IN  std_logic_vector(dataWidth-1 downto 0);
+         dout : OUT  std_logic_vector(dataWidth-1 downto 0)
         );
     END COMPONENT;
     
