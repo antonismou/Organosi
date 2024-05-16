@@ -49,6 +49,26 @@ entity Datapath is
 end Datapath;
 
 architecture Behavioral of Datapath is
+COMPONENT DecRegToExec
+	Port(
+		clk: in std_logic;
+		rst: in std_logic;
+		RF_AIN : IN  std_logic_vector(31 downto 0);
+      RF_BIN : IN  std_logic_vector(31 downto 0);
+		RF_AOUT : OUT  std_logic_vector(31 downto 0);
+      RF_BOUT : OUT std_logic_vector(31 downto 0)
+	);
+End COMPONENT;
+COMPONENT reg
+	 generic(dataWidth: integer := 32);
+    PORT(
+         clk : IN  std_logic;
+         rst : IN  std_logic;
+         we : IN  std_logic;
+         data : IN  std_logic_vector(dataWidth-1 downto 0);
+         dout : OUT  std_logic_vector(dataWidth-1 downto 0)
+        );
+    END COMPONENT;
 COMPONENT IFSTAGE
     PORT(
          PC_Immed : IN  std_logic_vector(31 downto 0);
@@ -92,15 +112,27 @@ component MEM
            MEM_DataIn : in  STD_LOGIC_VECTOR (31 downto 0);
            MEM_DataOut : out  STD_LOGIC_VECTOR (31 downto 0));
 	END COMPONENT;
-signal instrS,AluOutS,MemOutS,immedS,RFA,RFB : STD_LOGIC_VECTOR(31 downto 0);
+signal instrSToReg,instrS,AluOutS,ALU_outSToReg,MemOutS,MemOutSToReg,immedS,immedSToReg,RFA,RFASToReg,RFB,RFBSToReg : STD_LOGIC_VECTOR(31 downto 0);
 begin
-InsFetch: IFSTAGE port map(PC_Immed => immedS, PC_sel => pcSel, PC_LdEn => pcLdEn, rst => RST, clk => clk, Instr => instrS);
+InsFetch: IFSTAGE port map(PC_Immed => immedS, PC_sel => pcSel, PC_LdEn => pcLdEn, rst => RST, clk => clk, Instr => instrSToReg);
+
+RegIFInstr : reg port map(clk=> clk, rst => rst, we => '1', data => instrSToReg, dout => instrS);
+
 Decoder: DECSTAGE port map(
 	instr => instrS, rst => rst, clk => clk, RF_we => RFWe, ALUOut => AluOutS, MEMOut => MemOutS, RF_B_sel => RF_B_sel,
-	RF_wData_sel => RFWrData, immed => immedS, RF_A => RFA, RF_B => RFB, ImmedControl => ImmedControl, selMem=> selMem);
+	RF_wData_sel => RFWrData, immed => immedSToReg, RF_A => RFASToReg, RF_B => RFBSToReg, ImmedControl => ImmedControl, selMem=> selMem);
+
+RegDECImmed: reg port map(clk=> clk, rst => rst, we => '1', data => immedSToReg, dout => immedS);
+RegDecToExec: DecRegToExec port map(clk=> clk, rst => rst, RF_AIN => RFASToReg, RF_BIN => RFBSToReg, RF_AOUT =>RFA,RF_BOUT =>RFB);
+
 AlU: ALU_ex port map(RF_A => RFA, RF_B => RFB, immed => immedS, ALU_Bin_sel => ALU_Bin_sel,
-	ALU_Func => ALU_Func , ALU_out => AluOutS, Zero=> Zero, Ovf => Ovf, Cout => Cout);
-MEMO : MEM port map(clk => clk, Mem_WrEn => WeMem , ALU_MEM_addr => AluOutS, MEM_DataOut => MemOutS, MEM_DataIn =>RFB);
+	ALU_Func => ALU_Func , ALU_out => ALU_outSToReg, Zero=> Zero, Ovf => Ovf, Cout => Cout);
+	
+RegALuOut : reg port map(clk=> clk, rst => rst, we => '1', data => ALU_outSToReg, dout => ALUoutS);
+
+MEMO : MEM port map(clk => clk, Mem_WrEn => WeMem , ALU_MEM_addr => AluOutS, MEM_DataOut => MemOutSToReg, MEM_DataIn =>RFB);
+
+RegMEMOut : reg port map(clk=> clk, rst => rst, we => '1', data => MemOutSToReg, dout => MemOutS);
 
 instr<= instrS;
 end Behavioral;
