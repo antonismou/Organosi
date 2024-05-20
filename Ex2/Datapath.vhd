@@ -45,7 +45,10 @@ entity Datapath is
            Cout : out std_logic;
 			  ImmedControl: in STD_LOGIC_VECTOR(1 downto 0);
 			  instr : out  STD_LOGIC_VECTOR (31 downto 0);
-			  selMem : in std_logic);
+			  selMem : in std_logic;
+				weImmed: in std_logic;
+				weAluOut: in std_logic
+				);
 end Datapath;
 
 architecture Behavioral of Datapath is
@@ -122,13 +125,13 @@ Decoder: DECSTAGE port map(
 	instr => instrS, rst => rst, clk => clk, RF_we => RFWe, ALUOut => AluOutS, MEMOut => MemOutS, RF_B_sel => RF_B_sel,
 	RF_wData_sel => RFWrData, immed => immedSToReg, RF_A => RFASToReg, RF_B => RFBSToReg, ImmedControl => ImmedControl, selMem=> selMem);
 
-RegDECImmed: reg port map(clk=> clk, rst => rst, we => '1', data => immedSToReg, dout => immedS);
+RegDECImmed: reg port map(clk=> clk, rst => rst, we => weImmed, data => immedSToReg, dout => immedS);
 Reg_DecToExec: RegDecToExec port map(clk=> clk, rst => rst, RF_AIN => RFASToReg, RF_BIN => RFBSToReg, RF_AOUT =>RFA,RF_BOUT =>RFB);
 
 AlU: ALU_ex port map(RF_A => RFA, RF_B => RFB, immed => immedS, ALU_Bin_sel => ALU_Bin_sel,
 	ALU_Func => ALU_Func , ALU_out => ALU_outSToReg, Zero=> Zero, Ovf => Ovf, Cout => Cout);
 	
-RegALuOut : reg port map(clk=> clk, rst => rst, we => '1', data => ALU_outSToReg, dout => ALUoutS);
+RegALuOut : reg port map(clk=> clk, rst => rst, we => weAluOut, data => ALU_outSToReg, dout => ALUoutS);
 
 MEMO : MEM port map(clk => clk, Mem_WrEn => WeMem , ALU_MEM_addr => AluOutS, MEM_DataOut => MemOutSToReg, MEM_DataIn =>RFB);
 
