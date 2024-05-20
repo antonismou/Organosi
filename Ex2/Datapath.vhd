@@ -49,7 +49,7 @@ entity Datapath is
 end Datapath;
 
 architecture Behavioral of Datapath is
-COMPONENT DecRegToExec
+COMPONENT RegDecToExec
 	Port(
 		clk: in std_logic;
 		rst: in std_logic;
@@ -123,7 +123,7 @@ Decoder: DECSTAGE port map(
 	RF_wData_sel => RFWrData, immed => immedSToReg, RF_A => RFASToReg, RF_B => RFBSToReg, ImmedControl => ImmedControl, selMem=> selMem);
 
 RegDECImmed: reg port map(clk=> clk, rst => rst, we => '1', data => immedSToReg, dout => immedS);
-RegDecToExec: DecRegToExec port map(clk=> clk, rst => rst, RF_AIN => RFASToReg, RF_BIN => RFBSToReg, RF_AOUT =>RFA,RF_BOUT =>RFB);
+Reg_DecToExec: RegDecToExec port map(clk=> clk, rst => rst, RF_AIN => RFASToReg, RF_BIN => RFBSToReg, RF_AOUT =>RFA,RF_BOUT =>RFB);
 
 AlU: ALU_ex port map(RF_A => RFA, RF_B => RFB, immed => immedS, ALU_Bin_sel => ALU_Bin_sel,
 	ALU_Func => ALU_Func , ALU_out => ALU_outSToReg, Zero=> Zero, Ovf => Ovf, Cout => Cout);
