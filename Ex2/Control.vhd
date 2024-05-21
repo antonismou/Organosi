@@ -53,7 +53,11 @@ entity Control is
 end Control;
 
 architecture Behavioral of Control is
-type fsmStates is (IFState,IFBranch,DECImmedSE,DECImmedZF,DECImmedB,DECImmedU,DECRType,ExecImmed,ExecRtype,MEM,MEMIdle,WriteBackMEM,WriteBackALU);
+type fsmStates is (IFState,IFBranch,
+						DECImmedSE,DECImmedZF,DECImmedB,DECImmedU,DECRType,
+						Exec_li_lui_addi,Exec_andi,Exec_ori,Exec_beq_bne_b_lw_sw,ExecRtype,
+						MEM_lb,MEM_sw,MEMIdle,
+						WriteBackMEM,WriteBackALU,WriteBackSw);
 --type fsmStates is (rtype,li,lui,addi,andi,ori,b,beq,bne,lb,lw,sb,sw,idle,afterB);
 signal state,nextState : fsmStates;
 signal outSignal : std_logic_vector(16 downto 0);
@@ -143,6 +147,8 @@ begin
 			outSignal <= "00X0011XXXXXXXXX0";
 			--------------NEXT STATE
 			nextState <= IFState;
+		when WriteBackSw =>
+			outSignal <= "00X000XXXXXXXXXX0";
 		WHEN OTHERS=>
 		END CASE;
 			
