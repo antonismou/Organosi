@@ -90,7 +90,7 @@ begin
 	begin
 		case state is
 		when IFState =>
-			outSignal <= ""
+			--outSignal <= "";
 			IF instr(31 downto 30) = "10" then
 				nextState <= DECRType;
 			else 
@@ -134,22 +134,7 @@ begin
 			--------------NEXT STATE
 			nextState <= ExecRtype;
 		WHEN ExecRtype =>
-			-------------NOT IN USE IF
-			pcSel <= 'X';
-			pcLdEn <= '0';
-			--------------NOT IN USE DEC
-			rfWe <= '0';
-			rfWrDataSel <= 'X';
-			rfBSel <= 'X';						
-			immedControl<="XX";	
-			selMem <= 'X';			
-			--------------USE ALU
-			aluBinSel <= '0';
-			aluFunc <= instr(3 downto 0);
-			--------------NOT IN USE MEM
-			memWe <= '0';
-			--------------NEXT STATE
-			nextState <= MEMIdle;
+			outSignal<=(16 downto 9 =>"10X000XXXX0") & instr(3 downto 0) & "X0";
 		WHEN MEMIdle =>
 			-------------NOT IN USE IF
 			pcSel <= 'X';
