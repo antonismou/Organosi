@@ -88,6 +88,7 @@ begin
 	
 	output: process(state,zero)
 	begin
+<<<<<<< Updated upstream
 		case state is
 		when IFState =>
 			--outSignal <= "";
@@ -173,6 +174,61 @@ begin
 			nextState <= IFState;
 		WHEN OTHERS=>
 		END CASE;
+=======
+		case state is
+		when IFState =>
+			outSignal <= "X00100XXXXXXXXXX0";
+			IF instr(31 downto 30) = "10" then
+				nextState <= DECRType;
+			else 
+				nextState <= DECImmed;
+			end if;
+		when IFBranch => 
+			outSignal <= "X01100XXXXXXXXXX0";
+			IF instr(31 downto 30) = "10" then
+				nextState <= DECRType;
+			else 
+				nextState <= DECImmed;
+			end if;
+		when DECRType =>
+			outSignal <= "X1X000X0XXXXXXXX0";
+			nextState <= ExecRtype;
+		when DECImmedSE =>
+			outSignal <= "X1X000X101XXXXXX0";
+		when DECImmedZF =>
+			outSignal <= "X1X000X100XXXXXX0";
+		when DECImmedU =>
+			outSignal <= "X1X000X110XXXXXX0";
+		when DECImmedB =>
+			outSignal <= "X1X000X111XXXXXX0";
+		WHEN ExecRtype =>
+			outSignal<=(16 downto 9 =>"10X000XXXX0") & instr(3 downto 0) & "X0";
+		WHEN Exec_li_lui_addi=>
+			outSignal<="10X000XXXX10000X0";
+		WHEN Exec_andi=>
+			outSignal<="10X000XXXX10010X0";
+		WHEN Exec_ori=>
+			outSignal<="10X000XXXX10011X0";
+		WHEN Exec_beq_bne_b_lb_lw_sw=>
+			outSignal<="10X000XXXX00001X0";
+		WHEN MEM_lb=>
+			outSignal<="00X000XXXXXXXXX10";
+		WHEN MEM_sw=>
+			outSignal<="00X000XXXXXXXXXX1";
+		WHEN MEMIdle =>
+			outSignal<="00X000XXXXXXXXX00";
+			
+		WHEN WriteBackALU =>
+			outSignal <= "00X0010XXXXXXXXX0";
+			--------------NEXT STATE
+			nextState <= IFState;
+		when WriteBackMEM =>
+			outSignal <= "00X0011XXXXXXXXX0";
+			--------------NEXT STATE
+			nextState <= IFState;
+		WHEN OTHERS=>
+		END CASE;
+>>>>>>> Stashed changes
 			
 --			when idle =>
 --				pcSel <= '0';
