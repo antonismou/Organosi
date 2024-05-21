@@ -47,15 +47,31 @@ entity Control is
 			clk: in STD_LOGIC;
 			immedControl: out STD_LOGIC_VECTOR(1 downto 0);
 			selMem : out std_logic;
-			selBranch : out std_logic);
+			selBranch : out std_logic;
+			weImmed: out std_logic;
+			weAluOut: out std_logic);
 end Control;
 
 architecture Behavioral of Control is
 type fsmStates is (IFState,IFBranch,DECImmed,DECRType,ExecImmed,ExecRtype,MEM,MEMIdle,WriteBackMEM,WriteBackALU);
 --type fsmStates is (rtype,li,lui,addi,andi,ori,b,beq,bne,lb,lw,sb,sw,idle,afterB);
 signal state,nextState : fsmStates;
+signal outSignal : std_logic_vector(14 downto 0);
 
 begin
+	pcSel <= outSignal(14);
+	pcLdEn <= outSignal(13);
+	selBranch <= outSignal(12);
+	rfWe <= outSignal(11);
+	rfWrDataSel <= outSignal(10);
+	rfBSel <= outSignal(9);
+	immedControl<= outSignal(8 downto 7);
+	selMem <= outSignal(6);
+	aluBinSel <= outSignal(5);
+	aluFunc <= outSignal(4 downto 1);
+	memWe <= outSignal(0);
+	
+	
 	findState : process(clk)
 	begin
 	if rst = '1' then
@@ -74,6 +90,7 @@ begin
 		when IFState =>
 			pcSel <= '0';
 			pcLdEn <= '1';
+			selBranch <= '0';
 			--------------NOT IN USE DEC
 			rfWe <= '0';
 			rfWrDataSel <= 'X';

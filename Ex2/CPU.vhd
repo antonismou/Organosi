@@ -50,7 +50,10 @@ COMPONENT Datapath
            Cout : out std_logic;
 			  ImmedControl: in STD_LOGIC_VECTOR(1 downto 0);
 			  instr : out  STD_LOGIC_VECTOR (31 downto 0);
-			  selMem : in std_logic);
+			  selMem : in std_logic;
+			  selBranch : in std_logic;
+			  weImmed: in std_logic;
+			  weAluOut: in std_logic);
     END COMPONENT;
 COMPONENT Control
 	Port (instr : in  STD_LOGIC_VECTOR (31 downto 0);
@@ -69,19 +72,24 @@ COMPONENT Control
         	rst : in  STD_LOGIC;
 			immedControl: out STD_LOGIC_VECTOR(1 downto 0);
 			clk: in STD_LOGIC;
-			selMem : out std_logic);
+			selMem : out std_logic;
+			selBranch : out std_logic;
+			weImmed: out std_logic;
+			weAluOut: out std_logic);
 	END COMPONENT;
-	signal pcSelS,pcLdEnS,rfWeS,rfBSelS,rfWrDataSelS,memWeS,aluBinSelS,zeroS,ovfS,coutS,selMem: std_logic;
+	signal pcSelS,pcLdEnS,rfWeS,rfBSelS,rfWrDataSelS,memWeS,aluBinSelS,zeroS,ovfS,coutS,selMem,selBranchS,weALUS,weImmedS: std_logic;
 	signal immedCS: std_logic_vector(1 downto 0);
 	signal aluFuncS : std_logic_vector(3 downto 0);
 	signal instrS : std_logic_vector(31 downto 0);
 begin
 	cpu_controler: control port map(instr => instrS,zero => zeroS, ovf=> ovfS, cout => coutS, pcSel => pcSelS,
 		pcLdEn => pcLdEnS, rfWe => rfWeS, rfBSel => rfBSelS, rfWrDataSel => rfWrDataSelS, memWe=> memWeS,immedControl=>immedCS,
-		aluBinSel => aluBinSelS, aluFunc => aluFuncS, rst => rst, clk => clk , selMem => selMem);
+		aluBinSel => aluBinSelS, aluFunc => aluFuncS, rst => rst, clk => clk , selMem => selMem,
+		selBranch => selBranchS, weImmed => weImmedS, weAluOut => weAluS);
 	cpu_datapath: datapath port map(instr => instrS,Zero => zeroS, Ovf=> ovfS, Cout => coutS, pcSel => pcSelS,
 		pcLdEn => pcLdEnS, RFWe => rfWeS, RF_B_Sel => rfBSelS, RFWrData => rfWrDataSelS, WeMem=> memWeS, ImmedControl=>immedCS,
-		ALU_Bin_Sel => aluBinSelS, ALU_Func => aluFuncS, rst => rst, clk => clk, selMem => selMem);
+		ALU_Bin_Sel => aluBinSelS, ALU_Func => aluFuncS, rst => rst, clk => clk, selMem => selMem,
+		selBranch => selBranchS, weImmed => weImmedS, weAluOut => weAluS);
 
 end Behavioral;
 
