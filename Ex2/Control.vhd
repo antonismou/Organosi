@@ -126,18 +126,14 @@ begin
 			outSignal<="10X000XXXX10010X0";
 		WHEN Exec_ori=>
 			outSignal<="10X000XXXX10011X0";
-		WHEN Exec_b=>
-			outSignal<="X0X000XXXXXXXXXX0";
-		WHEN Exec_beq_bne=>
+		WHEN Exec_beq_bne_b_lb_lw_sw=>
 			outSignal<="10X000XXXX00001X0";
-		WHEN Exec_lb_lw_sw=>
-			outSignal<="10X000XXXXXXXXXX0";
 		WHEN MEM_lb=>
 			outSignal<="00X000XXXXXXXXX10";
 		WHEN MEM_sw=>
 			outSignal<="00X000XXXXXXXXXX1";
 		WHEN MEMIdle =>
-			outSignal<="00X000XXXXXXXXXX0";
+			outSignal<="00X000XXXXXXXXX00";
 			
 		WHEN WriteBackALU =>
 			outSignal <= "00X0010XXXXXXXXX0";
