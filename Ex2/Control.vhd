@@ -46,7 +46,8 @@ entity Control is
         	rst : in  STD_LOGIC;
 			clk: in STD_LOGIC;
 			immedControl: out STD_LOGIC_VECTOR(1 downto 0);
-			selMem : out std_logic);
+			selMem : out std_logic;
+			selBranch : out std_logic);
 end Control;
 
 architecture Behavioral of Control is
