@@ -55,7 +55,7 @@ end Control;
 architecture Behavioral of Control is
 type fsmStates is (IFState,IFBranch,
 						DECImmedSE,DECImmedZF,DECImmedB,DECImmedU,DECRType,
-						Exec_li_lui_addi,Exec_andi,Exec_ori,Exec_beq_bne_b_lw_sw,ExecRtype,
+						Exec_li_lui_addi,Exec_andi,Exec_ori,Exec_beq_bne_b_lb_lw_sw,ExecRtype,
 						MEM_lb,MEM_sw,MEMIdle,
 						WriteBackMEM,WriteBackALU,WriteBackSw);
 --type fsmStates is (rtype,li,lui,addi,andi,ori,b,beq,bne,lb,lw,sb,sw,idle,afterB);
@@ -120,20 +120,36 @@ begin
 			outSignal <= "X1X000X111XXXXXX0";
 		WHEN ExecRtype =>
 			outSignal<= "10X000XXXX0" & instr(3 downto 0) & "X0";
+			nextState<= MEMIdle;
 		WHEN Exec_li_lui_addi=>
 			outSignal<="10X000XXXX10000X0";
+			nextState<= MEMIdle;
 		WHEN Exec_andi=>
 			outSignal<="10X000XXXX10010X0";
+			nextState<= MEMIdle;
 		WHEN Exec_ori=>
 			outSignal<="10X000XXXX10011X0";
+			nextState<= MEMIdle;
 		WHEN Exec_beq_bne_b_lb_lw_sw=>
 			outSignal<="10X000XXXX00001X0";
+			if (instr(31 downto 26)= "111111" or instr(31 downto 26)="010000" or instr(31 downto 26)="010001" )then --branches
+			nextState<= IFBranch;
+			elsif (instr(31 downto 26)="000011") then --lb
+			nextState<= MEM_lb;
+			elsif (instr(31 downto 26)="001111") then --sw
+			nextState<= MEM_sw;
+			else --lw
+			nextState<= MEMIdle;
+			end if;
 		WHEN MEM_lb=>
 			outSignal<="00X000XXXXXXXXX10";
+			nextState<=WriteBackMEM;
 		WHEN MEM_sw=>
 			outSignal<="00X000XXXXXXXXXX1";
+			nextState<=WriteBackSw;
 		WHEN MEMIdle =>
 			outSignal<="00X000XXXXXXXXX00";
+			nextState<=WriteBackALU;
 			
 		WHEN WriteBackALU =>
 			outSignal <= "00X0010XXXXXXXXX0";
@@ -145,6 +161,7 @@ begin
 			nextState <= IFState;
 		when WriteBackSw =>
 			outSignal <= "00X000XXXXXXXXXX0";
+			nextState <= IFState;
 		WHEN OTHERS=>
 		END CASE;
 			
