@@ -34,6 +34,7 @@ entity Datapath is
            rst : in  STD_LOGIC;
            pcSel : in  STD_LOGIC;
            pcLdEn : in  STD_LOGIC;
+			  selBranch : in std_logic;
            RFWe : in std_logic;
            RFWrData : in std_logic;
 			  RF_B_sel : in std_logic;
@@ -77,6 +78,7 @@ COMPONENT IFSTAGE
          PC_Immed : IN  std_logic_vector(31 downto 0);
          PC_sel : IN  std_logic;
          PC_LdEn : IN  std_logic;
+			selBranch : in std_logic;
          rst : IN  std_logic;
          clk : IN  std_logic;
          Instr : OUT  std_logic_vector(31 downto 0));
@@ -117,7 +119,7 @@ component MEM
 	END COMPONENT;
 signal instrSToReg,instrS,AluOutS,ALU_outSToReg,MemOutS,MemOutSToReg,immedS,immedSToReg,RFA,RFASToReg,RFB,RFBSToReg : STD_LOGIC_VECTOR(31 downto 0);
 begin
-InsFetch: IFSTAGE port map(PC_Immed => immedS, PC_sel => pcSel, PC_LdEn => pcLdEn, rst => RST, clk => clk, Instr => instrSToReg);
+InsFetch: IFSTAGE port map(PC_Immed => immedS, PC_sel => pcSel, PC_LdEn => pcLdEn, rst => RST, clk => clk, Instr => instrSToReg, selBranch => selBranch);
 
 RegIFInstr : reg port map(clk=> clk, rst => rst, we => '1', data => instrSToReg, dout => instrS);
 
