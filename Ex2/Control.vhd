@@ -115,39 +115,26 @@ begin
 		when DECImmedB =>
 			outSignal <= "X1X000X111XXXXXX0";
 		WHEN ExecRtype =>
-			-------------NOT IN USE IF
-			pcSel <= 'X';
-			pcLdEn <= '0';
-			--------------NOT IN USE DEC
-			rfWe <= '0';
-			rfWrDataSel <= 'X';
-			rfBSel <= 'X';						
-			immedControl<="XX";	
-			selMem <= 'X';			
-			--------------USE ALU
-			aluBinSel <= '0';
-			aluFunc <= instr(3 downto 0);
-			--------------NOT IN USE MEM
-			memWe <= '0';
-			--------------NEXT STATE
-			nextState <= MEMIdle;
+			outSignal<=(16 downto 9 =>"10X000XXXX0") & instr(3 downto 0) & "X0";
+		WHEN Exec_li_lui_addi=>
+			outSignal<="10X000XXXX10000X0";
+		WHEN Exec_andi=>
+			outSignal<="10X000XXXX10010X0";
+		WHEN Exec_ori=>
+			outSignal<="10X000XXXX10011X0";
+		WHEN Exec_b=>
+			outSignal<="X0X000XXXXXXXXXX0";
+		WHEN Exec_beq_bne=>
+			outSignal<="10X000XXXX00001X0";
+		WHEN Exec_lb_lw_sw=>
+			outSignal<="10X000XXXXXXXXXX0";
+		WHEN MEM_lb=>
+			outSignal<="00X000XXXXXXXXX10";
+		WHEN MEM_sw=>
+			outSignal<="00X000XXXXXXXXXX1";
 		WHEN MEMIdle =>
-			-------------NOT IN USE IF
-			pcSel <= 'X';
-			pcLdEn <= '0';
-			--------------NOT IN USE DEC
-			rfWe <= '0';
-			rfWrDataSel <= 'X';
-			rfBSel <= 'X';						
-			immedControl<="XX";	
-			selMem <= 'X';			
-			--------------NOT IN USE ALU
-			aluBinSel <= 'X';
-			aluFunc <= "XXXX";
-			--------------NOT IN USE MEM
-			memWe <= '0';
-			--------------NEXT STATE
-			nextState <= WriteBackALU;
+			outSignal<="00X000XXXXXXXXXX0";
+			
 		WHEN WriteBackALU =>
 			outSignal <= "00X0010XXXXXXXXX0";
 			--------------NEXT STATE
