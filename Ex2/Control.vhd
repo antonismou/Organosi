@@ -119,7 +119,7 @@ begin
 		when DECImmedB =>
 			outSignal <= "X1X000X111XXXXXX0";
 		WHEN ExecRtype =>
-			outSignal<=(16 downto 9 =>"10X000XXXX0") & instr(3 downto 0) & "X0";
+			outSignal<= "10X000XXXX0" & instr(3 downto 0) & "X0";
 		WHEN Exec_li_lui_addi=>
 			outSignal<="10X000XXXX10000X0";
 		WHEN Exec_andi=>
