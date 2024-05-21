@@ -162,8 +162,20 @@ begin
 			nextState<= MEMIdle;
 		WHEN Exec_beq_bne_b_lb_lw_sw=>
 			outSignal<="10X000XXXX00001X0";
-			if (instr(31 downto 26)= "111111" or instr(31 downto 26)="010000" or instr(31 downto 26)="010001" )then --branches
+			if instr(31 downto 26)= "111111" then --b
 			nextState<= IFBranch;
+			elsif instr(31 downto 26)="010000" then --beq
+				if Zero ='0' then
+					nextState<= IFBranch;
+				else
+				nextState<= IFState;
+				end if;
+			elsif instr(31 downto 26)="010001" then-- bne
+				if Zero /='0' then
+					nextState<= IFBranch;
+				else
+				nextState<= IFState;
+				end if;
 			elsif (instr(31 downto 26)="000011") then --lb
 			nextState<= MEM_lb;
 			elsif (instr(31 downto 26)="001111") then --sw
