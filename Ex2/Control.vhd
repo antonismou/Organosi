@@ -53,7 +53,7 @@ entity Control is
 end Control;
 
 architecture Behavioral of Control is
-type fsmStates is (IFState,IFBranch,DECImmed,DECRType,ExecImmed,ExecRtype,MEM,MEMIdle,WriteBackMEM,WriteBackALU);
+type fsmStates is (IFState,IFBranch,DECImmedSE,DECImmedZF,DECImmedB,DECImmedU,DECRType,ExecImmed,ExecRtype,MEM,MEMIdle,WriteBackMEM,WriteBackALU);
 --type fsmStates is (rtype,li,lui,addi,andi,ori,b,beq,bne,lb,lw,sb,sw,idle,afterB);
 signal state,nextState : fsmStates;
 signal outSignal : std_logic_vector(16 downto 0);
@@ -90,49 +90,30 @@ begin
 	begin
 		case state is
 		when IFState =>
-			--outSignal <= "";
+			outSignal <= "X00100XXXXXXXXXX0";
 			IF instr(31 downto 30) = "10" then
 				nextState <= DECRType;
 			else 
 				nextState <= DECImmed;
 			end if;
 		when IFBranch => 
-			pcSel <= '1';
-			pcLdEn <= '1';
-			--------------NOT IN USE DEC
-			rfWe <= '0';
-			rfWrDataSel <= 'X';
-			rfBSel <= 'X';
-			immedControl<="XX";
-			selMem <= 'X';
-			--------------NOT IN USE ALU
-			aluBinSel <= 'X';
-			aluFunc <= "XXXX";
-			--------------NOT IN USE MEM
-			memWe <= '0';
-			--------------NEXT STATE
+			outSignal <= "X01100XXXXXXXXXX0";
 			IF instr(31 downto 30) = "10" then
 				nextState <= DECRType;
 			else 
 				nextState <= DECImmed;
 			end if;
 		when DECRType =>
-			-------------NOT IN USE IF
-			pcSel <= 'X';
-			pcLdEn <= '0';
-			--------------USE DEC
-			rfWe <= '0';			--WRITE DISABLE
-			rfWrDataSel <= 'X';	--NOT IN USE
-			rfBSel <= '0';			--R TYPE			
-			immedControl<="XX";	--NOT IN USE
-			selMem <= 'X';			--NOT IN USE
-			--------------NOT IN USE ALU
-			aluBinSel <= 'X';
-			aluFunc <= "XXXX";
-			--------------NOT IN USE MEM
-			memWe <= '0';
-			--------------NEXT STATE
+			outSignal <= "X1X000X0XXXXXXXX0";
 			nextState <= ExecRtype;
+		when DECImmedSE =>
+			outSignal <= "X1X000X101XXXXXX0";
+		when DECImmedZF =>
+			outSignal <= "X1X000X100XXXXXX0";
+		when DECImmedU =>
+			outSignal <= "X1X000X110XXXXXX0";
+		when DECImmedB =>
+			outSignal <= "X1X000X111XXXXXX0";
 		WHEN ExecRtype =>
 			outSignal<=(16 downto 9 =>"10X000XXXX0") & instr(3 downto 0) & "X0";
 		WHEN Exec_li_lui_addi=>
@@ -155,20 +136,11 @@ begin
 			outSignal<="00X000XXXXXXXXXX0";
 			
 		WHEN WriteBackALU =>
-			-------------NOT IN USE IF
-			pcSel <= 'X';
-			pcLdEn <= '0';
-			--------------USE DEC
-			rfWe <= '1';				--WRITE ENABLE
-			rfWrDataSel <= 'X';		--NOT IN USE
-			rfBSel <= '0';				--ALU WRITE BACK						
-			immedControl<="XX";		--NOT IN USE
-			selMem <= 'X';				--NOT IN USE
-			--------------NOT IN USE ALU
-			aluBinSel <= 'X';
-			aluFunc <= "XXXX";
-			--------------NOT IN USE MEM
-			memWe <= '0';
+			outSignal <= "00X0010XXXXXXXXX0";
+			--------------NEXT STATE
+			nextState <= IFState;
+		when WriteBackMEM =>
+			outSignal <= "00X0011XXXXXXXXX0";
 			--------------NEXT STATE
 			nextState <= IFState;
 		WHEN OTHERS=>
