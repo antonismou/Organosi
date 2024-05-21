@@ -56,9 +56,11 @@ architecture Behavioral of Control is
 type fsmStates is (IFState,IFBranch,DECImmed,DECRType,ExecImmed,ExecRtype,MEM,MEMIdle,WriteBackMEM,WriteBackALU);
 --type fsmStates is (rtype,li,lui,addi,andi,ori,b,beq,bne,lb,lw,sb,sw,idle,afterB);
 signal state,nextState : fsmStates;
-signal outSignal : std_logic_vector(14 downto 0);
+signal outSignal : std_logic_vector(16 downto 0);
 
 begin
+	weAluOut <= outSignal(16);
+	weImmed <= outSignal(15);
 	pcSel <= outSignal(14);
 	pcLdEn <= outSignal(13);
 	selBranch <= outSignal(12);
@@ -88,21 +90,7 @@ begin
 	begin
 		case state is
 		when IFState =>
-			pcSel <= '0';
-			pcLdEn <= '1';
-			selBranch <= '0';
-			--------------NOT IN USE DEC
-			rfWe <= '0';
-			rfWrDataSel <= 'X';
-			rfBSel <= 'X';
-			immedControl<="XX";
-			selMem <= 'X';
-			--------------NOT IN USE ALU
-			aluBinSel <= 'X';
-			aluFunc <= "XXXX";
-			--------------NOT IN USE MEM
-			memWe <= '0';
-			--------------NEXT STATE
+			outSignal <= ""
 			IF instr(31 downto 30) = "10" then
 				nextState <= DECRType;
 			else 
