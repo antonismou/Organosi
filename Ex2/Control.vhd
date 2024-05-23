@@ -54,7 +54,8 @@ end Control;
 
 architecture Behavioral of Control is
 type fsmStates is (IFState,IFBranch,
-						DECImmedSE,DECImmedZF,DECImmedB,DECImmedU,DECRType,
+						DEC,
+						--DECImmedSE,DECImmedZF,DECImmedB,DECImmedU,DECRType,
 						Exec_li_lui_addi,Exec_andi,Exec_ori,Exec_beq_bne_b_lb_lw_sw,ExecRtype,
 						MEM_lb,MEM_sw,MEMIdle,
 						WriteBackMEM,WriteBackALU,WriteBackSw);
@@ -93,61 +94,86 @@ begin
 	output: process(state,zero)
 	begin
 		case state is
-		when IFState =>
+		WHEN IFState =>
 			outSignal <= "X00100XXXXXXXXXX0";
+			nextState<= DEC;
+--			IF instr(31 downto 30) = "10" then
+--				nextState <= DECRType;
+--			elsif instr(31 downto 26) = "111000" or instr(31 downto 26) = "110000"
+--					or instr(31 downto 26) = "000011" or instr(31 downto 26) = "001111"
+--					or instr(31 downto 26) = "011111" then
+--				nextState <= DECImmedSE;
+--			elsif instr(31 downto 26) = "110010" or instr(31 downto 26) = "110011" then
+--				nextState <= DECImmedZF;
+--			elsif instr(31 downto 26) = "111001" then
+--				nextState <= DECImmedU;
+--			else 
+--				nextState <= DECImmedB;
+--			end if;
+		WHEN IFBranch => 
+		outSignal <= "X01100XXXXXXXXXX0";
+		nextState<= DEC;
+--			IF instr(31 downto 30) = "10" then
+--				nextState <= DECRType;
+--			elsif instr(31 downto 26) = "111000" or instr(31 downto 26) = "110000"
+--					or instr(31 downto 26) = "000011" or instr(31 downto 26) = "001111"
+--					or instr(31 downto 26) = "011111" then
+--				nextState <= DECImmedSE;
+--			elsif instr(31 downto 26) = "110010" or instr(31 downto 26) = "110011" then
+--				nextState <= DECImmedZF;
+--			elsif instr(31 downto 26) = "111001" then
+--				nextState <= DECImmedU;
+--			else 
+--				nextState <= DECImmedB;
+--			end if;
+		WHEN DEC=>
 			IF instr(31 downto 30) = "10" then
-				nextState <= DECRType;
-			elsif instr(31 downto 26) = "111000" or instr(31 downto 26) = "110000"
-					or instr(31 downto 26) = "000011" or instr(31 downto 26) = "001111"
-					or instr(31 downto 26) = "011111" then
-				nextState <= DECImmedSE;
-			elsif instr(31 downto 26) = "110010" or instr(31 downto 26) = "110011" then
-				nextState <= DECImmedZF;
-			elsif instr(31 downto 26) = "111001" then
-				nextState <= DECImmedU;
-			else 
-				nextState <= DECImmedB;
+				nextState <= ExecRtype;
+			elsif instr(31 downto 26) = "111000" or instr(31 downto 26) = "110000" then --li or addi
+				outSignal<="X1X000X101XXXXXX0";
+				nextState<=Exec_li_lui_addi;
+			elsif	instr(31 downto 26) = "000011" or instr(31 downto 26) = "001111" --or lb or lw
+					or instr(31 downto 26) = "011111" then -- or sw
+						outSignal<="X1X000X101XXXXXX0";
+						nextState<=Exec_beq_bne_b_lb_lw_sw;
+			elsif instr(31 downto 26) = "110010" then --andi 
+				outSignal <= "X1X000X100XXXXXX0";
+				nextState<=Exec_andi;
+			elsif instr(31 downto 26) = "110011" then --ori
+				outSignal <= "X1X000X100XXXXXX0";
+				nextState<=Exec_ori;
+			elsif instr(31 downto 26) = "111001" then --lui
+				outSignal <= "X1X000X110XXXXXX0";
+				nextState<=Exec_li_lui_addi;
+			else --branches
+				outSignal <= "X1X000X111XXXXXX0";
+				nextState<=Exec_beq_bne_b_lb_lw_sw;
 			end if;
-		when IFBranch => 
-			outSignal <= "X01100XXXXXXXXXX0";
-			IF instr(31 downto 30) = "10" then
-				nextState <= DECRType;
-			elsif instr(31 downto 26) = "111000" or instr(31 downto 26) = "110000"
-					or instr(31 downto 26) = "000011" or instr(31 downto 26) = "001111"
-					or instr(31 downto 26) = "011111" then
-				nextState <= DECImmedSE;
-			elsif instr(31 downto 26) = "110010" or instr(31 downto 26) = "110011" then
-				nextState <= DECImmedZF;
-			elsif instr(31 downto 26) = "111001" then
-				nextState <= DECImmedU;
-			else 
-				nextState <= DECImmedB;
-			end if;
-		when DECRType =>
-			outSignal <= "X1X000X0XXXXXXXX0";
-			nextState <= ExecRtype;
-		when DECImmedSE =>
-			outSignal <= "X1X000X101XXXXXX0";
-			if instr(31) = '1' then 
-				nextState <= Exec_li_lui_addi;
-			else
-				nextState <= Exec_beq_bne_b_lb_lw_sw;
-			end if;
-		when DECImmedZF =>
-			outSignal <= "X1X000X100XXXXXX0";
-			--in this state is only the andi ori 
-			if instr(26) = '0' then
-				nextState <= Exec_andi;
-			else 
-				nextState <= Exec_ori;
-			end if;
-		when DECImmedU =>
-			--in this state only lui
-			outSignal <= "X1X000X110XXXXXX0";
-			nextState <= Exec_li_lui_addi;
-		when DECImmedB =>
-			outSignal <= "X1X000X111XXXXXX0";
-			nextState <= Exec_beq_bne_b_lb_lw_sw;
+--		when DECRType =>
+--			outSignal <= "X1X000X0XXXXXXXX0";
+--			nextState <= ExecRtype;
+--		when DECImmedSE =>
+--			outSignal <= "X1X000X101XXXXXX0";
+--			if instr(31) = '1' then 
+--				nextState <= Exec_li_lui_addi;
+--			else
+--				nextState <= Exec_beq_bne_b_lb_lw_sw;
+--			end if;
+--		when DECImmedZF =>
+--			outSignal <= "X1X000X100XXXXXX0";
+--			--in this state is only the andi ori 
+--			if instr(26) = '0' then
+--				nextState <= Exec_andi;
+--			else 
+--				nextState <= Exec_ori;
+--			end if;
+--		when DECImmedU =>
+--			--in this state only lui
+--			outSignal <= "X1X000X110XXXXXX0";
+--			nextState <= Exec_li_lui_addi;
+--		when DECImmedB =>
+--			outSignal <= "X1X000X111XXXXXX0";
+--			nextState <= Exec_beq_bne_b_lb_lw_sw;
 		WHEN ExecRtype =>
 			outSignal<= "10X000XXXX0" & instr(3 downto 0) & "X0";
 			nextState<= MEMIdle;
