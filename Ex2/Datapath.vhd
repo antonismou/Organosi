@@ -119,9 +119,9 @@ component MEM
 	END COMPONENT;
 signal instrSToReg,instrS,AluOutS,ALU_outSToReg,MemOutS,MemOutSToReg,immedS,immedSToReg,RFA,RFASToReg,RFB,RFBSToReg : STD_LOGIC_VECTOR(31 downto 0);
 begin
-InsFetch: IFSTAGE port map(PC_Immed => immedS, PC_sel => pcSel, PC_LdEn => pcLdEn, rst => RST, clk => clk, Instr => instrSToReg, selBranch => selBranch);
+InsFetch: IFSTAGE port map(PC_Immed => immedS, PC_sel => pcSel, PC_LdEn => pcLdEn, rst => RST, clk => clk, Instr => instrS, selBranch => selBranch);
 
-RegIFInstr : reg port map(clk=> clk, rst => rst, we => '1', data => instrSToReg, dout => instrS);
+--RegIFInstr : reg port map(clk=> clk, rst => rst, we => '1', data => instrSToReg, dout => instrS);
 
 Decoder: DECSTAGE port map(
 	instr => instrS, rst => rst, clk => clk, RF_we => RFWe, ALUOut => AluOutS, MEMOut => MemOutS, RF_B_sel => RF_B_sel,

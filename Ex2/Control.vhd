@@ -58,7 +58,8 @@ type fsmStates is (IFState,IFBranch,
 						--DECImmedSE,DECImmedZF,DECImmedB,DECImmedU,DECRType,
 						Exec_li_lui_addi,Exec_andi,Exec_ori,Exec_beq_bne_b_lb_lw_sw,ExecRtype,
 						MEM_lb,MEM_sw,MEMIdle,
-						WriteBackMEM,WriteBackALU,WriteBackSw);
+						WriteBackMEM,WriteBackALU,WriteBackSw,
+						idle);
 --type fsmStates is (rtype,li,lui,addi,andi,ori,b,beq,bne,lb,lw,sb,sw,idle,afterB);
 signal state,nextState : fsmStates;
 signal outSignal : std_logic_vector(16 downto 0);
@@ -79,14 +80,19 @@ begin
 	memWe <= outSignal(0);
 	
 	
-	findState : process(clk)
+	changeState : process(clk,rst)
 	begin
 	if rst = '1' then
-		state <= IFState;
-	elsif instr = X"00000000" then 
-		state <= IFState;
-	else 
-		state <= nextState;
+		state <= idle;
+		--nextState <= IFState;
+	else
+		if(rising_edge(clk)) then
+			if instr = X"00000000" then 
+				state <= idle;
+			else 
+				state <= nextState;
+			end if;
+		end if;
 	end if;
 	end process;
 	
@@ -188,9 +194,7 @@ begin
 			nextState<= MEMIdle;
 		WHEN Exec_beq_bne_b_lb_lw_sw=>
 			outSignal<="10X000XXXX00001X0";
-			if instr(31 downto 26)= "111111" then --b
-			nextState<= IFBranch;
-			elsif instr(31 downto 26)="010000" then --beq
+			if instr(31 downto 26)="010000" then --beq
 				if Zero ='0' then
 					nextState<= IFBranch;
 				else
@@ -203,11 +207,11 @@ begin
 				nextState<= IFState;
 				end if;
 			elsif (instr(31 downto 26)="000011") then --lb
-			nextState<= MEM_lb;
+			  nextState<= MEM_lb;
 			elsif (instr(31 downto 26)="001111") then --sw
-			nextState<= MEM_sw;
+			  nextState<= MEM_sw;
 			else --lw
-			nextState<= MEMIdle;
+			  nextState<= MEMIdle;
 			end if;
 		WHEN MEM_lb=>
 			outSignal<="00X000XXXXXXXXX10";
@@ -231,6 +235,8 @@ begin
 			outSignal <= "00X000XXXXXXXXXX0";
 			nextState <= IFState;
 		WHEN OTHERS=>
+			outSignal <= "00X000XXXXXXXXXX0";
+			nextState <= IFState;
 		END CASE;
 			
 --			when idle =>

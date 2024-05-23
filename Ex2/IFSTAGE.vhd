@@ -72,14 +72,20 @@ architecture Behavioral of IFSTAGE is
            dout : out  STD_LOGIC_VECTOR (31 downto 0));
 	end component;
 	
-	component IMEMComp is
-	Port(
-			clk : in std_logic;
-			pc : in std_logic_vector(31 downto 0);
-			immed : in std_logic_vector(31 downto 0);
-			selBranch: in std_logic;
-			instr : out std_logic_vector(31 downto 0));
-	end component IMEMComp;
+--	component IMEMComp is
+--	Port(
+--			clk : in std_logic;
+--			pc : in std_logic_vector(31 downto 0);
+--			immed : in std_logic_vector(31 downto 0);
+--			selBranch: in std_logic;
+--			instr : out std_logic_vector(31 downto 0));
+--	end component IMEMComp;
+
+	Component IFROM is
+	Port( a: in STD_LOGIC_VECTOR (9 DOWNTO 0);
+			spo: out STD_LOGIC_VECTOR (31 DOWNTO 0);
+			clk : in  STD_LOGIC);
+	end component;
 	
 signal mux2_out: STD_LOGIC_VECTOR (31 DOWNTO 0);
 signal incrementor_4_out: STD_LOGIC_VECTOR (31 DOWNTO 0);
@@ -104,8 +110,10 @@ mux: mux2 port map(
 program_counter: reg port map(
 	clk=>clk, rst=>rst, we=>Pc_LdEn, data=>mux2_out, dout=>reg_out);
 
-imem : IMEMComp port map(
-	clk => clk, pc => reg_out, immed =>PC_Immed, selBranch => selBranch, instr => Instr);
+--imem : IMEMComp port map(
+--	clk => clk, pc => reg_out, immed =>PC_Immed, selBranch => selBranch, instr => Instr);
+	
+rom_mem : IFROM port map(a => mux2_out(11 downto 2), spo => instr, clk => clk);
 
 end Behavioral;
 
