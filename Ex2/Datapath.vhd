@@ -48,8 +48,9 @@ entity Datapath is
 			  instr : out  STD_LOGIC_VECTOR (31 downto 0);
 			  selMem : in std_logic;
 				weImmed: in std_logic;
-				weAluOut: in std_logic
-				);
+				weAluOut: in std_logic;
+				we_Reg_to_Dec: in std_logic;
+				we_mem_to_wb: in std_logic);
 end Datapath;
 
 architecture Behavioral of Datapath is
@@ -121,7 +122,7 @@ signal instrSToReg,instrS,AluOutS,ALU_outSToReg,MemOutS,MemOutSToReg,immedS,imme
 begin
 InsFetch: IFSTAGE port map(PC_Immed => immedS, PC_sel => pcSel, PC_LdEn => pcLdEn, rst => RST, clk => clk, Instr => instrSToReg, selBranch => selBranch);
 
-RegIFInstr : reg port map(clk=> clk, rst => rst, we => '1', data => instrSToReg, dout => instrS);
+RegIFInstr : reg port map(clk=> clk, rst => rst, we => we_Reg_to_Dec, data => instrSToReg, dout => instrS);
 
 Decoder: DECSTAGE port map(
 	instr => instrS, rst => rst, clk => clk, RF_we => RFWe, ALUOut => AluOutS, MEMOut => MemOutS, RF_B_sel => RF_B_sel,
@@ -137,7 +138,7 @@ RegALuOut : reg port map(clk=> clk, rst => rst, we => weAluOut, data => ALU_outS
 
 MEMO : MEM port map(clk => clk, Mem_WrEn => WeMem , ALU_MEM_addr => AluOutS, MEM_DataOut => MemOutSToReg, MEM_DataIn =>RFB);
 
-RegMEMOut : reg port map(clk=> clk, rst => rst, we => '1', data => MemOutSToReg, dout => MemOutS);
+RegMEMOut : reg port map(clk=> clk, rst => rst, we => we_mem_to_wb, data => MemOutSToReg, dout => MemOutS);
 
 instr<= instrS;
 end Behavioral;
