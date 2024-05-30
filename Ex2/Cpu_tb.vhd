@@ -2,10 +2,10 @@
 -- Company: 
 -- Engineer:
 --
--- Create Date:   05:15:53 05/04/2024
+-- Create Date:   12:37:25 05/30/2024
 -- Design Name:   
--- Module Name:   /home/ise/Organosi/Ex1V8/CPUTest.vhd
--- Project Name:  Ex1V8
+-- Module Name:   /home/ise/organosh/Ex2V4/Cpu_tb.vhd
+-- Project Name:  Ex2V4
 -- Target Device:  
 -- Tool versions:  
 -- Description:   
@@ -32,10 +32,10 @@ USE ieee.std_logic_1164.ALL;
 -- arithmetic functions with Signed or Unsigned values
 --USE ieee.numeric_std.ALL;
  
-ENTITY CPUTest IS
-END CPUTest;
+ENTITY Cpu_tb IS
+END Cpu_tb;
  
-ARCHITECTURE behavior OF CPUTest IS 
+ARCHITECTURE behavior OF Cpu_tb IS 
  
     -- Component Declaration for the Unit Under Test (UUT)
  
@@ -75,11 +75,11 @@ BEGIN
    -- Stimulus process
    stim_proc: process
    begin		
-      rst<= '1';
+      -- hold reset state for 100 ns.
+		rst<='1';
       wait for 100 ns;	
-		rst<= '0';
+		rst<='0';
       wait for clk_period*10;
-
       -- insert stimulus here 
 
       wait;

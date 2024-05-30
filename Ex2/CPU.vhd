@@ -36,60 +36,108 @@ end CPU;
 architecture Behavioral of CPU is
 COMPONENT Datapath
     Port ( clk : in  STD_LOGIC;
-           rst : in  STD_LOGIC;
-           pcSel : in  STD_LOGIC;
-           pcLdEn : in  STD_LOGIC;
-           RFWe : in std_logic;
-           RFWrData : in std_logic;
-			  RF_B_sel : in std_logic;
-           WeMem : in std_logic;
-			  ALU_Bin_sel : in std_logic;
-			  ALU_Func : in std_logic_vector(3 downto 0);
-           Zero : out std_logic;
-           Ovf : out std_logic;
-           Cout : out std_logic;
-			  ImmedControl: in STD_LOGIC_VECTOR(1 downto 0);
-			  instr : out  STD_LOGIC_VECTOR (31 downto 0);
-			  selMem : in std_logic;
-			  selBranch : in std_logic;
-			  weImmed: in std_logic;
-			  weAluOut: in std_logic);
+            rst : in  STD_LOGIC;
+            pcSel : in  STD_LOGIC;
+            pcLdEn : in  STD_LOGIC;
+            selBranch : in std_logic;
+            RFWe : in std_logic;
+            RFWrData : in std_logic;
+            RF_B_sel : in std_logic;
+            WeMem : in std_logic;
+            ALU_Bin_sel : in std_logic;
+            ALU_Func : in std_logic_vector(3 downto 0);
+            Zero : out std_logic;
+            Ovf : out std_logic;
+            Cout : out std_logic;
+            ImmedControl: in STD_LOGIC_VECTOR(1 downto 0);
+            instr : out  STD_LOGIC_VECTOR (31 downto 0);
+            selMem : in std_logic;
+            weImmed: in std_logic;
+            weAluOut: in std_logic;
+            we_Reg_to_Dec: in std_logic;
+            we_mem_to_wb: in std_logic);
     END COMPONENT;
 COMPONENT Control
 	Port (instr : in  STD_LOGIC_VECTOR (31 downto 0);
-			zero : in std_logic;
-			ovf : in std_logic;
-			cout : in std_logic;
-        	pcSel : out  STD_LOGIC;
-        	pcLdEn : out  STD_LOGIC;
-        	rfWe : out  STD_LOGIC;
-        	rfBSel : out  STD_LOGIC;
-        	rfWrDataSel : out  STD_LOGIC;
-        	memWe : out  STD_LOGIC;
-			aluBinSel : out std_logic;
-			aluFunc : out STD_LOGIC_VECTOR(3 downto 0);
-        	rstOut : out  STD_LOGIC;
-        	rst : in  STD_LOGIC;
-			immedControl: out STD_LOGIC_VECTOR(1 downto 0);
-			clk: in STD_LOGIC;
-			selMem : out std_logic;
-			selBranch : out std_logic;
-			weImmed: out std_logic;
-			weAluOut: out std_logic);
+				zero : in std_logic;
+				ovf : in std_logic;
+				cout : in std_logic;
+				pcSel : out  STD_LOGIC;
+				pcLdEn : out  STD_LOGIC;
+				rfWe : out  STD_LOGIC;
+				rfBSel : out  STD_LOGIC;
+				rfWrDataSel : out  STD_LOGIC;
+				memWe : out  STD_LOGIC;
+				aluBinSel : out std_logic;
+				aluFunc : out STD_LOGIC_VECTOR(3 downto 0);
+				rstOut : out  STD_LOGIC;
+				rst : in  STD_LOGIC;
+				clk: in STD_LOGIC;
+				immedControl: out STD_LOGIC_VECTOR(1 downto 0);
+				selMem : out std_logic;
+				selBranch : out std_logic;
+				weImmed: out std_logic;
+				weAluOut: out std_logic;
+				we_Reg_A:out std_logic;
+				we_Reg_B:out std_logic;
+				we_mem_to_wb:out std_logic;
+				we_Reg_to_Dec:out std_logic);
 	END COMPONENT;
-	signal pcSelS,pcLdEnS,rfWeS,rfBSelS,rfWrDataSelS,memWeS,aluBinSelS,zeroS,ovfS,coutS,selMem,selBranchS,weALUS,weImmedS: std_logic;
-	signal immedCS: std_logic_vector(1 downto 0);
-	signal aluFuncS : std_logic_vector(3 downto 0);
-	signal instrS : std_logic_vector(31 downto 0);
+signal pcSelS, pcLdEnS, rfWeS, rfBSelS, rfWrDataSelS, memWeS, aluBinSelS, zeroS, ovfS, coutS, selMemS, selBranchS, weAluOutS, weImmedS, we_Reg_to_DecS, we_mem_to_wbS: std_logic;
+signal immedCS: std_logic_vector(1 downto 0);
+signal aluFuncS : std_logic_vector(3 downto 0);
+signal instrS : std_logic_vector(31 downto 0);
 begin
-	cpu_controler: control port map(instr => instrS,zero => zeroS, ovf=> ovfS, cout => coutS, pcSel => pcSelS,
-		pcLdEn => pcLdEnS, rfWe => rfWeS, rfBSel => rfBSelS, rfWrDataSel => rfWrDataSelS, memWe=> memWeS,immedControl=>immedCS,
-		aluBinSel => aluBinSelS, aluFunc => aluFuncS, rst => rst, clk => clk , selMem => selMem,
-		selBranch => selBranchS, weImmed => weImmedS, weAluOut => weAluS);
-	cpu_datapath: datapath port map(instr => instrS,Zero => zeroS, Ovf=> ovfS, Cout => coutS, pcSel => pcSelS,
-		pcLdEn => pcLdEnS, RFWe => rfWeS, RF_B_Sel => rfBSelS, RFWrData => rfWrDataSelS, WeMem=> memWeS, ImmedControl=>immedCS,
-		ALU_Bin_Sel => aluBinSelS, ALU_Func => aluFuncS, rst => rst, clk => clk, selMem => selMem,
-		selBranch => selBranchS, weImmed => weImmedS, weAluOut => weAluS);
+    cpu_control: Control port map(
+        instr => instrS,
+        zero => zeroS,
+        ovf => ovfS,
+        cout => coutS,
+        pcSel => pcSelS,
+        pcLdEn => pcLdEnS,
+        rfWe => rfWeS,
+        rfBSel => rfBSelS,
+        rfWrDataSel => rfWrDataSelS,
+        memWe => memWeS,
+        aluBinSel => aluBinSelS,
+        aluFunc => aluFuncS,
+        rstOut => open, -- not used
+        rst => rst,
+        clk => clk,
+        immedControl => immedCS,
+        selMem => selMemS,
+        selBranch => selBranchS,
+        weImmed => weImmedS,
+        weAluOut => weAluOutS,
+        we_Reg_A => open, -- not used
+        we_Reg_B => open, -- not used
+        we_mem_to_wb => we_mem_to_wbS,
+        we_Reg_to_Dec => we_Reg_to_DecS);
+
+	 cpu_datapath: Datapath port map(
+        clk => clk,
+        rst => rst,
+        pcSel => pcSelS,
+        pcLdEn => pcLdEnS,
+        selBranch => selBranchS,
+        RFWe => rfWeS,
+        RFWrData => rfWrDataSelS,
+        RF_B_sel => rfBSelS,
+        WeMem => memWeS,
+        ALU_Bin_sel => aluBinSelS,
+        ALU_Func => aluFuncS,
+        Zero => zeroS,
+        Ovf => ovfS,
+        Cout => coutS,
+        ImmedControl => immedCS,
+        instr => instrS,
+        selMem => selMemS,
+        weImmed => weImmedS,
+        weAluOut => weAluOutS,
+        we_Reg_to_Dec => we_Reg_to_DecS,
+        we_mem_to_wb => we_mem_to_wbS
+    );
+
 
 end Behavioral;
 

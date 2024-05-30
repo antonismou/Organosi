@@ -30,30 +30,30 @@ use IEEE.STD_LOGIC_1164.ALL;
 --use UNISIM.VComponents.all;
 
 entity Control is
-    Port (	instr : in  STD_LOGIC_VECTOR (31 downto 0);
-			zero : in std_logic;
-			ovf : in std_logic;
-			cout : in std_logic;
-        	pcSel : out  STD_LOGIC;
-        	pcLdEn : out  STD_LOGIC;
-        	rfWe : out  STD_LOGIC;
-        	rfBSel : out  STD_LOGIC;
-        	rfWrDataSel : out  STD_LOGIC;
-        	memWe : out  STD_LOGIC;
-			aluBinSel : out std_logic;
-			aluFunc : out STD_LOGIC_VECTOR(3 downto 0);
-        	rstOut : out  STD_LOGIC;
-        	rst : in  STD_LOGIC;
-			clk: in STD_LOGIC;
-			immedControl: out STD_LOGIC_VECTOR(1 downto 0);
-			selMem : out std_logic;
-			selBranch : out std_logic;
-			weImmed: out std_logic;
-			weAluOut: out std_logic;
-			we_Reg_A:out std_logic;
-			we_Reg_B:out std_logic;
-			we_mem_to_wb:out std_logic;
-			we_Reg_to_Dec:out std_logic);
+		 Port (	instr : in  STD_LOGIC_VECTOR (31 downto 0);
+				zero : in std_logic;
+				ovf : in std_logic;
+				cout : in std_logic;
+				pcSel : out  STD_LOGIC;
+				pcLdEn : out  STD_LOGIC;
+				rfWe : out  STD_LOGIC;
+				rfBSel : out  STD_LOGIC;
+				rfWrDataSel : out  STD_LOGIC;
+				memWe : out  STD_LOGIC;
+				aluBinSel : out std_logic;
+				aluFunc : out STD_LOGIC_VECTOR(3 downto 0);
+				rstOut : out  STD_LOGIC;
+				rst : in  STD_LOGIC;
+				clk: in STD_LOGIC;
+				immedControl: out STD_LOGIC_VECTOR(1 downto 0);
+				selMem : out std_logic;
+				selBranch : out std_logic;
+				weImmed: out std_logic;
+				weAluOut: out std_logic;
+				we_Reg_A:out std_logic;
+				we_Reg_B:out std_logic;
+				we_mem_to_wb:out std_logic;
+				we_Reg_to_Dec:out std_logic);
 end Control;
 
 architecture Behavioral of Control is
@@ -80,7 +80,7 @@ begin
 	end process;
 	
 	
-	 changeState: process(instr(31 downto 26),instr(3 downto 0), state)
+	 changeState: process(instr, state)
     begin
         nextState <= IFState;
         case(state) is
@@ -160,7 +160,7 @@ begin
 
 
 	
-	output: process(state,zero,instr(31 downto 26),instr(3 downto 0))
+	output: process(state,zero,instr)
 	begin
 		case state is
 		WHEN IFState =>
@@ -417,8 +417,8 @@ begin
 			memWe <= '0';--dont store 
 			we_mem_to_wb<='0';--dont write to meme reg
 		WHEN bne_beq=>
-			pcSel <= '1'; -- pc + 4 + immed
-			pcLdEn <= '1'; --dont wirte to pc
+			pcSel <= instr(26) xor Zero; -- pc+4 or pc + 4 + immed
+			pcLdEn <= instr(26) xor Zero;
 			we_Reg_to_Dec<='0'; --dont write instr to reg
 			--selBranch <= 
 			----------------
