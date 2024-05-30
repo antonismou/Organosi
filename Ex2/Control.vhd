@@ -80,7 +80,7 @@ begin
 	end process;
 	
 	
-	 changeState: process(instr, state)
+	 changeState: process(instr(31 downto 26),instr(3 downto 0), state)
     begin
         nextState <= IFState;
         case(state) is
@@ -160,7 +160,7 @@ begin
 
 
 	
-	output: process(state,zero,instr)
+	output: process(state,zero,instr(31 downto 26),instr(3 downto 0))
 	begin
 		case state is
 		WHEN IFState =>
