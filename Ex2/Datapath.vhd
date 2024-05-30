@@ -50,7 +50,9 @@ entity Datapath is
             weImmed: in std_logic;
             weAluOut: in std_logic;
             we_Reg_to_Dec: in std_logic;
-            we_mem_to_wb: in std_logic);
+            we_mem_to_wb: in std_logic;
+				we_RegA: in std_logic;
+				we_RegB: in std_logic);
 end Datapath;
 
 architecture Behavioral of Datapath is
@@ -134,7 +136,9 @@ Decoder: DECSTAGE port map(
     RF_wData_sel => RFWrData, immed => immedSToReg, RF_A => RFASToReg, RF_B => RFBSToReg, ImmedControl => ImmedControl, selMem => selMem);
 
 RegDECImmed: reg port map(clk=> clk, rst => rst, we => weImmed, data => immedSToReg, dout => immedS);
-Reg_DecToExec: RegDecToExec port map(clk=> clk, rst => rst, RF_AIN => RFASToReg, RF_BIN => RFBSToReg, RF_AOUT => RFA, RF_BOUT => RFB);
+
+regA: reg port map(clk=> clk, rst => rst, we => we_RegA, data => RFASToReg, dout => RFA); 
+regB: reg port map(clk=> clk, rst => rst, we => we_RegB, data => RFBSToReg, dout => RFB);
 
 AlU: ALU_ex port map(RF_A => RFA, RF_B => RFB, immed => immedS, ALU_Bin_sel => ALU_Bin_sel,
     ALU_Func => ALU_Func , ALU_out => ALU_outSToReg, Zero => Zero, Ovf => Ovf, Cout => Cout);

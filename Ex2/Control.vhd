@@ -42,7 +42,6 @@ entity Control is
 				memWe : out  STD_LOGIC;
 				aluBinSel : out std_logic;
 				aluFunc : out STD_LOGIC_VECTOR(3 downto 0);
-				rstOut : out  STD_LOGIC;
 				rst : in  STD_LOGIC;
 				clk: in STD_LOGIC;
 				immedControl: out STD_LOGIC_VECTOR(1 downto 0);
