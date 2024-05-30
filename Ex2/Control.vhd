@@ -57,11 +57,13 @@ end Control;
 
 architecture Behavioral of Control is
 type fsmStates is (IFState,IFBranch,
-						DECImmedSE,DECImmedZF,DECImmedB,DECImmedU,DECRType,
+						DEC,
+						--DECImmedSE,DECImmedZF,DECImmedB,DECImmedU,DECRType,
 						Exec_li_lui_addi,Exec_andi,Exec_ori,Exec_beq_bne_lb_lw_sw,ExecRtype,
 						MEM_load,MEM_sw,
 						WriteBackMEM,WriteBackALU,WriteBackSw,
-						b,bne_beq);
+						b,bne_beq,
+						idle);
 --type fsmStates is (rtype,li,lui,addi,andi,ori,b,beq,bne,lb,lw,sb,sw,idle,afterB);
 signal state,nextState : fsmStates;
 
@@ -72,7 +74,7 @@ begin
 		begin
 			wait until clk'EVENT and clk='1';
 			if rst = '1' then
-				state <= IFState;
+				state <= idle;
 			else 
 				state <= nextState;
 			end if;
@@ -83,52 +85,23 @@ begin
     begin
         nextState <= IFState;
         case(state) is
-            when IFState =>
-                case(instr(31 downto 26)) is
+            when IFState | IFBranch =>
+                nextState <= DEC;
+				when DEC =>
+					 case(instr(31 downto 26)) is
                     when "100000"=> --r_type
-                        nextState <= DECRType;
-                    when "111000" | "110000" | "000011" | "001111" | "011111" => --li, addi, lb, lw, sw
-                        nextState <= DECImmedSE;
-                    when "110010" | "110011" => -- andi, ori
-                        nextState <= DECImmedZF;
-                    when "111001" => -- lui
-                        nextState <= DECImmedU;
-                    when "010000" | "010001" | "111111" =>
-                        nextState <= DECImmedB;-- branches
-                    when others =>
-                        nextState <= IFState;
-                end case;
-				when DECRType =>
-                nextState <= ExecRtype;
-				when DECImmedSE =>
-                case(instr(31 downto 26)) is
-                    when "111000" | "110000" => --li, lui
-                        nextState <= Exec_li_lui_addi;
-                    when "000011" | "001111" | "011111" =>
-                        nextState <= Exec_beq_bne_lb_lw_sw;
-                    when others =>
-                        nextState <= IFState;
-                end case;
-				when DECImmedU =>
-                nextState <= Exec_li_lui_addi;
-            when DECImmedB =>
-                case(instr(31 downto 26)) is
-                    when "111111" => -- b
-                        nextState <= b;
-                    when "010000" | "010001" =>
-                        nextState <= Exec_beq_bne_lb_lw_sw;
-							when others=>
-								nextState<=IFState;
-                end case;
-            when DECImmedZF =>
-                case(instr(31 downto 26)) is
-                    when "110010" =>
-                        nextState <= Exec_andi;
-                    when "110011" =>
-                        nextState <= Exec_ori;
-                    when others =>
-                        nextState <= IFState;
-                end case;
+                        nextState <= ExecRType;
+							when "111000" | "110000" | "111001" => --li addi lui
+								nextState <= Exec_li_lui_addi;
+							when "110010"=> --andi
+								nextState <= Exec_andi;
+							when "110011" => --ori
+								nextState <= Exec_ori;
+							when "111111" => --b
+								nextState <= IFBranch;
+							when others =>
+								nextState <= Exec_beq_bne_lb_lw_sw;
+						end case;
             when ExecRtype | Exec_andi | Exec_ori | Exec_li_lui_addi =>
                 nextState <= WriteBackALU;
             when Exec_beq_bne_lb_lw_sw =>
@@ -163,7 +136,6 @@ begin
 	begin
 		case state is
 		WHEN IFState =>
-			
 			pcSel <= '0'; -- pc + 4
 			pcLdEn <= '1'; --wirte to pc
 			we_Reg_to_Dec<='1'; --write instr to reg
@@ -184,105 +156,60 @@ begin
 			selMem <='X';--no use
 			memWe <= '0';--dont store 
 			we_mem_to_wb<='0';--dont write to meme reg
-		when DECRType =>
-			pcSel <= '0'; -- pc + 4
-			pcLdEn <= '0'; --dont wirte to pc
-			we_Reg_to_Dec<='0'; --dont write instr to reg
+		WHEN IFBranch=>
+			pcSel <= '1'; -- pc + 4 + immed
+			pcLdEn <= '1'; --dont wirte to pc
+			we_Reg_to_Dec<='1'; --write instr to reg
 			--selBranch <= 
 			----------------
 			rfWe <= '0'; -- no write in rf
-			rfWrDataSel <= 'X';--read drom alu
-			rfBSel <= '0';--set rt(no use here)
+			rfWrDataSel <= 'X'; --dont care
+			rfBSel <= 'X';--set rt
 			immedControl<= "XX";--modify immed(no use here)
 			weImmed <='0';-- dont write to immed reg
-			we_Reg_A<='1';--dont write to regA
-			we_Reg_B<='1';--dont write to regB
+			we_Reg_A<='0';--dont write to regA
+			we_Reg_B<='0';--dont write to regB
 			---------------
 			aluBinSel <= '0';-- choose rfB
 			aluFunc <= "0000";--alu func
-			weAluOut <= '0';--no write to alu reg
+			weAluOut <= '0';-- write to alu reg
 			--------------
 			selMem <='X';--no use
 			memWe <= '0';--dont store 
 			we_mem_to_wb<='0';--dont write to meme reg
-		when DECImmedSE =>
+		when DEC =>
 			pcSel <= '0'; -- pc + 4
 			pcLdEn <= '0'; --dont wirte to pc
 			we_Reg_to_Dec<='0'; --dont write instr to reg
-			--selBranch <= 
 			----------------
 			rfWe <= '0'; -- no write in rf
-			rfWrDataSel <= 'X';--dont care
-			rfBSel <= '1';--set rt
-			immedControl<= "01";--modify immed(no use here)
-			weImmed <='1';-- dont write to immed reg
+			rfWrDataSel <= 'X';--read drom alu
 			we_Reg_A<='1';--dont write to regA
 			we_Reg_B<='1';--dont write to regB
+			case(instr(31 downto 26)) is
+				when "100000"=> --r_type
+					rfBSel <= '0';			--set rt(no use here)
+					immedControl<= "XX";	--modify immed(no use here)
+					weImmed <='0';			-- dont write to immed reg
+            when "111000" | "110000" | "000011" | "001111" | "011111" => --li, addi, lb, lw, sw
+               rfBSel <= '1';			--set rt
+					immedControl<= "01";	--modify immed
+					weImmed <='1';			--write to immed reg
+				when "110010" | "110011" => -- andi, ori
+               rfBSel <= '1';			--set rt
+					immedControl<= "00";	--modify immed
+					weImmed <='1';			--write to immed reg
+            when "111001" => -- lui
+               rfBSel <= '1';			--set rt
+					immedControl<= "10";	--modify immed
+					weImmed <='1';			--write to immed reg
+            when others => --branchs
+               rfBSel <= '1';			--set rt
+					immedControl<= "11";	--modify immed
+					weImmed <='1';			-- dont write to immed reg
+         end case;
 			---------------
-			aluBinSel <= '1';-- choose immed
-			aluFunc <= "0000";--alu func
-			weAluOut <= '0';--no write to alu reg
-			--------------
-			selMem <='X';--no use
-			memWe <= '0';--dont store 
-			we_mem_to_wb<='0';--dont write to meme reg
-		when DECImmedZF =>
-			pcSel <= '0'; -- pc + 4
-			pcLdEn <= '0'; --dont wirte to pc
-			we_Reg_to_Dec<='0'; --dont write instr to reg
-			--selBranch <= 
-			----------------
-			rfWe <= '0'; -- no write in rf
-			rfWrDataSel <= 'X'; --dont care
-			rfBSel <= '1';--set rt
-			immedControl<= "00";--modify immed(no use here)
-			weImmed <='1';-- dont write to immed reg
-			we_Reg_A<='1';--dont write to regA
-			we_Reg_B<='1';--dont write to regB
-			---------------
-			aluBinSel <= '1';-- choose immed
-			aluFunc <= "0000";--alu func
-			weAluOut <= '0';--no write to alu reg
-			--------------
-			selMem <='X';--no use
-			memWe <= '0';--dont store 
-			we_mem_to_wb<='0';--dont write to meme reg
-		when DECImmedU =>
-			pcSel <= '0'; -- pc + 4
-			pcLdEn <= '0'; --dont wirte to pc
-			we_Reg_to_Dec<='0'; --dont write instr to reg
-			--selBranch <= 
-			----------------
-			rfWe <= '0'; -- no write in rf
-			rfWrDataSel <= 'X'; --dont care
-			rfBSel <= '1';--set rt
-			immedControl<= "10";--modify immed(no use here)
-			weImmed <='1';-- dont write to immed reg
-			we_Reg_A<='1';--dont write to regA
-			we_Reg_B<='1';--dont write to regB
-			---------------
-			aluBinSel <= '1';-- choose immed
-			aluFunc <= "0000";--alu func
-			weAluOut <= '0';--no write to alu reg
-			--------------
-			selMem <='X';--no use
-			memWe <= '0';--dont store 
-			we_mem_to_wb<='0';--dont write to meme reg
-		when DECImmedB =>
-			pcSel <= '0'; -- pc + 4
-			pcLdEn <= '0'; --dont wirte to pc
-			we_Reg_to_Dec<='0'; --dont write instr to reg
-			--selBranch <= 
-			----------------
-			rfWe <= '0'; -- no write in rf
-			rfWrDataSel <= 'X'; --dont care
-			rfBSel <= '1';--set rt
-			immedControl<= "11";--modify immed(no use here)
-			weImmed <='1';-- dont write to immed reg
-			we_Reg_A<='1';--dont write to regA
-			we_Reg_B<='1';--dont write to regB
-			---------------
-			aluBinSel <= '1';-- choose immed
+			aluBinSel <= '0';-- choose rfB
 			aluFunc <= "0000";--alu func
 			weAluOut <= '0';--no write to alu reg
 			--------------
@@ -394,27 +321,6 @@ begin
 			selMem <='X';--no use
 			memWe <= '0';--dont store 
 			we_mem_to_wb<='0';--dont write to meme reg
-		WHEN b=>
-			pcSel <= '1'; -- pc + 4 + immed
-			pcLdEn <= '1'; --dont wirte to pc
-			we_Reg_to_Dec<='0'; --dont write instr to reg
-			--selBranch <= 
-			----------------
-			rfWe <= '0'; -- no write in rf
-			rfWrDataSel <= 'X'; --dont care
-			rfBSel <= 'X';--set rt
-			immedControl<= "XX";--modify immed(no use here)
-			weImmed <='0';-- dont write to immed reg
-			we_Reg_A<='0';--dont write to regA
-			we_Reg_B<='0';--dont write to regB
-			---------------
-			aluBinSel <= '0';-- choose rfB
-			aluFunc <= "0000";--alu func
-			weAluOut <= '0';-- write to alu reg
-			--------------
-			selMem <='X';--no use
-			memWe <= '0';--dont store 
-			we_mem_to_wb<='0';--dont write to meme reg
 		WHEN bne_beq=>
 			pcSel <= instr(26) xor Zero; -- pc+4 or pc + 4 + immed
 			pcLdEn <= instr(26) xor Zero;
@@ -507,6 +413,27 @@ begin
 			----------------
 			rfWe <= '1'; --  write in rf
 			rfWrDataSel <= '1'; --choose from alu
+			rfBSel <= 'X';--set rt
+			immedControl<= "XX";--modify immed(no use here)
+			weImmed <='0';-- dont write to immed reg
+			we_Reg_A<='0';--dont write to regA
+			we_Reg_B<='0';--dont write to regB
+			---------------
+			aluBinSel <= 'X';-- choose immed
+			aluFunc <= "XXXX";--alu func
+			weAluOut <= '0';--no write to alu reg
+			--------------
+			selMem <='X';--no use
+			memWe <= '0';-- store 
+			we_mem_to_wb<='0';-- write to meme reg
+		when idle => 
+			pcSel <= '0'; -- pc + 4
+			pcLdEn <= '0'; --dont wirte to pc
+			we_Reg_to_Dec<='0'; --dont write instr to reg
+			--selBranch <= 
+			----------------
+			rfWe <= '0'; --  dont write in rf
+			rfWrDataSel <= 'X'; --dont use
 			rfBSel <= 'X';--set rt
 			immedControl<= "XX";--modify immed(no use here)
 			weImmed <='0';-- dont write to immed reg
