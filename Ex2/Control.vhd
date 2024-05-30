@@ -95,7 +95,7 @@ begin
                     when "111001" => -- lui
                         nextState <= DECImmedU;
                     when "010000" | "010001" | "111111" =>
-                        nextState <= DECImmedB;
+                        nextState <= DECImmedB;-- branches
                     when others =>
                         nextState <= IFState;
                 end case;
@@ -115,7 +115,7 @@ begin
             when DECImmedB =>
                 case(instr(31 downto 26)) is
                     when "111111" => -- b
-                        nextState <= IFState;
+                        nextState <= b;
                     when "010000" | "010001" =>
                         nextState <= Exec_beq_bne_lb_lw_sw;
 							when others=>
