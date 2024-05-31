@@ -386,7 +386,7 @@ begin
 			selMem <='0';--no use
 			memWe <= '1';-- store 
 			we_mem_to_wb<='1';-- write to meme reg
-		WHEN WriteBackALU =>
+		WHEN WriteBackALU =>-- wirte back form alu result
 			pcSel <= '0'; -- pc + 4
 			pcLdEn <= '0'; --dont wirte to pc
 			we_Reg_to_Dec<='0'; --dont write instr to reg
@@ -407,7 +407,7 @@ begin
 			selMem <='X';--no use
 			memWe <= '0';-- store 
 			we_mem_to_wb<='0';-- write to meme reg
-		when WriteBackMEM =>
+		when WriteBackMEM => -- wirte back from load
 			pcSel <= '0'; -- pc + 4
 			pcLdEn <= '0'; --dont wirte to pc
 			we_Reg_to_Dec<='0'; --dont write instr to reg
