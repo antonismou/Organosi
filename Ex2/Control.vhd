@@ -59,7 +59,7 @@ architecture Behavioral of Control is
 type fsmStates is (IFState,IFBranch,
 						DEC,
 						--DECImmedSE,DECImmedZF,DECImmedB,DECImmedU,DECRType,
-						Exec_li_lui_addi,Exec_andi,Exec_ori,Exec_beq_bne_lb_lw_sw,ExecRtype,
+						Exec_li_lui_addi,Exec_andi,Exec_ori,Exec_beq_bne,Exec_lb_lw_sw,ExecRtype,
 						MEM_load,MEM_sw,
 						WriteBackMEM,WriteBackALU,WriteBackSw,
 						b,bne_beq,
@@ -99,28 +99,28 @@ begin
 								nextState <= Exec_ori;
 							when "111111" => --b
 								nextState <= IFBranch;
+							when "000011" | "001111" | "011111" => --lb, lw, sw
+								nextState <= Exec_lb_lw_sw;
 							when others =>
-								nextState <= Exec_beq_bne_lb_lw_sw;
+								nextState <= Exec_beq_bne;
 						end case;
             when ExecRtype | Exec_andi | Exec_ori | Exec_li_lui_addi =>
                 nextState <= WriteBackALU;
-            when Exec_beq_bne_lb_lw_sw =>
-                case(instr(31 downto 26)) is
-                    when "000011" | "001111" => -- lb, lw
-                        nextState <= MEM_load;
+				when Exec_lb_lw_sw =>
+					 case(instr(31 downto 26)) is
                     when "011111" => -- sw
                         nextState <= MEM_sw;
-                    when "010000" | "010001" => -- beq, bne
-								if instr(31 downto 26) = "010000" and zero = '1' then
-									nextState <= IFBranch;
-								elsif instr(31 downto 26) = "010001" and zero = '0'  then
-									nextState <= IFBranch;
-								else
-									nextState<=IFState;
-								end if;
-                    when others =>
-                        nextState <= IFState;
-                end case;
+							when others =>
+								nextState <= MEM_load;
+						end case;
+            when Exec_beq_bne =>
+						if instr(31 downto 26) = "010000" and zero = '1' then
+							nextState <= IFBranch;
+						elsif instr(31 downto 26) = "010001" and zero = '0'  then
+							nextState <= IFBranch;
+						else
+							nextState<=IFState;
+						end if;
             when MEM_load =>
                 nextState <= WriteBackMEM;
             when MEM_sw =>
@@ -302,7 +302,28 @@ begin
 			selMem <='X';--no use
 			memWe <= '0';--dont store 
 			we_mem_to_wb<='0';--dont write to meme reg
-		WHEN Exec_beq_bne_lb_lw_sw=>
+		WHEN Exec_lb_lw_sw=>
+			pcSel <= '0'; -- pc + 4
+			pcLdEn <= '0'; --dont wirte to pc
+			we_Reg_to_Dec<='0'; --dont write instr to reg
+			--selBranch <= 
+			----------------
+			rfWe <= '0'; -- no write in rf
+			rfWrDataSel <= 'X'; --dont care
+			rfBSel <= 'X';--set rt
+			immedControl<= "XX";--modify immed(no use here)
+			weImmed <='0';-- dont write to immed reg
+			we_Reg_A<='0';--dont write to regA
+			we_Reg_B<='0';--dont write to regB
+			---------------
+			aluBinSel <= '1';-- choose rfB
+			aluFunc <= "0000";--alu func
+			weAluOut <= '1';-- write to alu reg
+			--------------
+			selMem <='X';--no use
+			memWe <= '0';--dont store 
+			we_mem_to_wb<='0';--dont write to meme reg
+		WHEN Exec_beq_bne=>
 			pcSel <= '0'; -- pc + 4
 			pcLdEn <= '0'; --dont wirte to pc
 			we_Reg_to_Dec<='0'; --dont write instr to reg
