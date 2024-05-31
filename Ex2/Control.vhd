@@ -81,7 +81,7 @@ begin
 	end process;
 	
 	
-	 changeState: process(instr(31 downto 26),instr(3 downto 0), state)
+	 changeState: process(instr(31 downto 26),instr(3 downto 0), state,zero)
     begin
         nextState <= IFState;
         case(state) is
@@ -111,7 +111,13 @@ begin
                     when "011111" => -- sw
                         nextState <= MEM_sw;
                     when "010000" | "010001" => -- beq, bne
-                        nextState <= IFState;
+								if instr(31 downto 26) = "010000" and zero = '1' then
+									nextState <= IFBranch;
+								elsif instr(31 downto 26) = "010001" and zero = '0'  then
+									nextState <= IFBranch;
+								else
+									nextState<=IFState;
+								end if;
                     when others =>
                         nextState <= IFState;
                 end case;
@@ -121,10 +127,6 @@ begin
                 nextState <= IFState;
             when WriteBackALU | WriteBackMEM=>
                 nextState <= IFState;
-				when b=>
-					nextState<=IFState;
-				when bne_beq=>
-					nextState<=IFState;
             when others =>
                 nextState <= IFState;
         end case;
@@ -321,27 +323,27 @@ begin
 			selMem <='X';--no use
 			memWe <= '0';--dont store 
 			we_mem_to_wb<='0';--dont write to meme reg
-		WHEN bne_beq=>
-			pcSel <= instr(26) xor Zero; -- pc+4 or pc + 4 + immed
-			pcLdEn <= instr(26) xor Zero;
-			we_Reg_to_Dec<='0'; --dont write instr to reg
-			--selBranch <= 
-			----------------
-			rfWe <= '0'; -- no write in rf
-			rfWrDataSel <= 'X'; --dont care
-			rfBSel <= 'X';--set rt
-			immedControl<= "XX";--modify immed(no use here)
-			weImmed <='0';-- dont write to immed reg
-			we_Reg_A<='0';--dont write to regA
-			we_Reg_B<='0';--dont write to regB
-			---------------
-			aluBinSel <= '0';-- choose rfB
-			aluFunc <= "0000";--alu func
-			weAluOut <= '0';-- write to alu reg
-			--------------
-			selMem <='X';--no use
-			memWe <= '0';--dont store 
-			we_mem_to_wb<='0';--dont write to mem reg
+--		WHEN bne_beq=>
+--			pcSel <= instr(26) xor Zero; -- pc+4 or pc + 4 + immed
+--			pcLdEn <= instr(26) xor Zero;
+--			we_Reg_to_Dec<='0'; --dont write instr to reg
+--			--selBranch <= 
+--			----------------
+--			rfWe <= '0'; -- no write in rf
+--			rfWrDataSel <= 'X'; --dont care
+--			rfBSel <= 'X';--set rt
+--			immedControl<= "XX";--modify immed(no use here)
+--			weImmed <='0';-- dont write to immed reg
+--			we_Reg_A<='0';--dont write to regA
+--			we_Reg_B<='0';--dont write to regB
+--			---------------
+--			aluBinSel <= '0';-- choose rfB
+--			aluFunc <= "0000";--alu func
+--			weAluOut <= '0';-- write to alu reg
+--			--------------
+--			selMem <='X';--no use
+--			memWe <= '0';--dont store 
+--			we_mem_to_wb<='0';--dont write to mem reg
 		WHEN MEM_load=>
 			pcSel <= '0'; -- pc + 4
 			pcLdEn <= '0'; --dont wirte to pc
