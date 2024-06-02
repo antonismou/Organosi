@@ -22,19 +22,22 @@ memory_initialization_vector=
 01111100100000010000000000000000,
 00111100100111110000000000000000,
 00001100000111110000000000000000,
-11111110001100000000000000001010,
-01000110011100110000000000001010;
+11111110001100000000000000000001,
+11100000000000010111111111111100,
+11100000000000010111111111111111;
 
 
-;li reg1;li reg 2
-;lui reg1 ; lui reg2 
+;li reg1
+;li reg 2
+;lui reg1 
+;lui reg2 
 ;addi reg1<=1
 ;addi reg3<=3
 ;add reg4<= reg1 + reg3
 ;sub reg5<= reg1 - reg3
 ;and reg6<= reg1 and reg3
 ;not reg7<= reg1
-;or reg8<= reg1 or reg3
+;or reg8<= reg1 or reg
 ;addi reg2
 ;sra reg9<=reg2
 ;sll reg10<=reg2
@@ -46,6 +49,6 @@ memory_initialization_vector=
 ;sw reg1=> 4
 ;lw 4=> reg32
 ;lb 4=> reg32
-;B reg16<= reg17 + 10
+;B reg16<= reg17 + 1
 ;beq reg18<=reg18+10
 ;bne reg18<reg19+10
