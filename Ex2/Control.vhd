@@ -75,6 +75,8 @@ begin
 			wait until clk'EVENT and clk='1';
 			if rst = '1' then
 				state <= idle;
+			elsif instr = x"00000000" then
+				state<=idle;
 			else 
 				state <= nextState;
 			end if;
