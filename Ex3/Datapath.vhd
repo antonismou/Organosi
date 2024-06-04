@@ -47,12 +47,11 @@ entity Datapath is
             ImmedControl: in STD_LOGIC_VECTOR(1 downto 0);
             instr : out  STD_LOGIC_VECTOR (31 downto 0);
             selMem : in std_logic;
-            weImmed: in std_logic;
-            weAluOut: in std_logic;
-            we_Reg_to_Dec: in std_logic;
-            we_mem_to_wb: in std_logic;
-				we_RegA: in std_logic;
-				we_RegB: in std_logic);
+            we_DEC_IF_Immed_reg: in std_logic;
+            we_IF_DEC_reg: in std_logic;
+				we_DEC_EX_reg : in std_logic;
+				we_EX_MEM_reg: in std_logic;
+				we_MEM_WB_reg: in std_logic);
 end Datapath;
 
 architecture Behavioral of Datapath is
@@ -100,6 +99,7 @@ COMPONENT DECSTAGE
            clk : in  STD_LOGIC;
            immed : out  STD_LOGIC_VECTOR (31 downto 0);
            ImmedControl: in STD_LOGIC_VECTOR(1 downto 0);
+			  RD: IN STD_LOGIC_VECTOR(4 downto 0);
            RF_A : out  STD_LOGIC_VECTOR (31 downto 0);
            RF_B : out  STD_LOGIC_VECTOR (31 downto 0);
            selMem : in std_logic);
@@ -124,31 +124,42 @@ COMPONENT MEM
            MEM_DataIn : in  STD_LOGIC_VECTOR (31 downto 0);
            MEM_DataOut : out  STD_LOGIC_VECTOR (31 downto 0));
 END COMPONENT;
-signal instrSToReg,instrS,AluOutS,ALU_outSToReg,MemOutS,MemOutSToReg,immedS,immedSToReg,RFA,RFASToReg,RFB,RFBSToReg : STD_LOGIC_VECTOR(31 downto 0);
+signal instrS,instrSToReg,immedS,immedSToReg,RFASToReg,RFBSToReg,ALU_outSToReg,MemOutS,MemOutSToReg : STD_LOGIC_VECTOR(31 downto 0);
+signal RDs : std_logic_vector(4 downto 0);
+signal IF_DEC_reg_in,IF_DEC_reg_out : STD_LOGIC_VECTOR(39 - 18 downto 0);	--in/out for reg IF/DEC size: 18(cntrl S) + 32(instr)=40
+signal DEC_EX_reg_in,DEC_EX_reg_out : STD_LOGIC_VECTOR(82 - 14 downto 0);	--in/out for reg DEC/EX size: 14(cntrl S) + 5(RF_D) + 32(RF_A) + 32(RF_B)=83 
+signal EX_MEM_reg_in,EX_MEM_reg_out : STD_LOGIC_VECTOR(76 - 8 downto 0);	--in/out for reg EX/MEM size: 8(cntrl S) + 5(RF_D) + 32(RF_B) + 32(ALU_OUT) = 77
+signal MEM_WB_reg_in,MEM_WB_reg_out : STD_LOGIC_VECTOR(73 - 5 downto 0);	--in/out for reg MEM/WB size: 5(cntrl S) + 5(RF_D) + 32(ALU_out) + 32(MEM_out)= 74
 begin
-
+---------------------------------------IF--------------------------------------
 InsFetch: IFSTAGE port map(PC_Immed => immedS, PC_sel => pcSel, PC_LdEn => pcLdEn, rst => rst, clk => clk, Instr => instrSToReg);
-
-RegIFInstr : reg port map(clk=> clk, rst => rst, we => we_Reg_to_Dec, data => instrSToReg, dout => instrS);
-
-Decoder: DECSTAGE port map(
-    instr => instrS, rst => rst, clk => clk, RF_we => RFWe, ALUOut => AluOutS, MEMOut => MemOutS, RF_B_sel => RF_B_sel,
-    RF_wData_sel => RFWrData, immed => immedSToReg, RF_A => RFASToReg, RF_B => RFBSToReg, ImmedControl => ImmedControl, selMem => selMem);
-
-RegDECImmed: reg port map(clk=> clk, rst => rst, we => weImmed, data => immedSToReg, dout => immedS);
-
-regA: reg port map(clk=> clk, rst => rst, we => we_RegA, data => RFASToReg, dout => RFA); 
-regB: reg port map(clk=> clk, rst => rst, we => we_RegB, data => RFBSToReg, dout => RFB);
-
-AlU: ALU_ex port map(RF_A => RFA, RF_B => RFB, immed => immedS, ALU_Bin_sel => ALU_Bin_sel,
+-----------------------------------IF/DEC REG----------------------------------
+IF_DEC_reg : reg port map(clk=> clk, rst => rst, we => we_IF_DEC_reg, data => instrSToReg, dout => instrS);
+--------------------------------------DEC--------------------------------------
+ID: DECSTAGE port map(
+    instr => instrS, rst => rst, clk => clk, RF_we => RFWe, ALUOut => MEM_WB_reg_out(63 downto 32), MEMOut => MEM_WB_reg_out(31 downto 0), 
+	 RF_B_sel => RF_B_sel,RF_wData_sel => RFWrData, immed => immedSToReg,RD=> MEM_WB_reg_out(68 downto 64) ,RF_A => RFASToReg, RF_B => RFBSToReg,
+	 ImmedControl => ImmedControl, selMem => selMem);
+--------------------------------DEC/IF(IMMED)REG--------------------------------
+DEC_IF_Immed_reg: reg port map(clk=> clk, rst => rst, we => we_DEC_IF_Immed_reg, data => immedSToReg, dout => immedS);
+-----------------------------------DEC/EX REG-----------------------------------
+DEC_EX_reg_in <= instrS(20 downto 16) & RFASToReg & RFBSToReg ;	-- RF_D + RF_A + RF_B
+DEC_EX_reg : reg generic map(dataWidth => 83)
+				port map(clk=> clk, rst => rst, we => we_DEC_EX_reg, data => DEC_EX_reg_in, dout => DEC_EX_reg_out); 
+---------------------------------------EX---------------------------------------
+EX: ALU_ex port map(RF_A => DEC_EX_reg_out(63 downto 32), RF_B => DEC_EX_reg_out(31 downto 0), immed => immedS, ALU_Bin_sel => ALU_Bin_sel,
     ALU_Func => ALU_Func , ALU_out => ALU_outSToReg, Zero => Zero, Ovf => Ovf, Cout => Cout);
-
-RegALuOut : reg port map(clk => clk, rst => rst, we => weAluOut, data => ALU_outSToReg, dout => AluOutS);
-
-MEMO : MEM port map(clk => clk, Mem_WrEn => WeMem , ALU_MEM_addr => AluOutS, MEM_DataOut => MemOutSToReg, MEM_DataIn => RFB);
-
-RegMEMOut : reg port map(clk => clk, rst => rst, we => we_mem_to_wb, data => MemOutSToReg, dout => MemOutS);
+-----------------------------------EX/MEM REG-----------------------------------
+EX_MEM_reg_in <= DEC_EX_reg_out(68 downto 64) & DEC_EX_reg_out(31 downto 0) & ALU_outSToReg ;	-- RF_D + RF_B + ALU_out
+EX_MEM_reg : reg generic map(dataWidth => 77)
+				port map(clk => clk, rst => rst, we => we_EX_MEM_reg, data => EX_MEM_reg_in, dout => EX_MEM_reg_out);
+---------------------------------------MEM--------------------------------------
+MEMO : MEM port map(clk => clk, Mem_WrEn => WeMem , ALU_MEM_addr => EX_MEM_reg_out(31 downto 0),
+						  MEM_DataOut => MemOutSToReg, MEM_DataIn => EX_MEM_reg_out(63 downto 32));
+-----------------------------------MEM/WB REG-----------------------------------
+MEM_WB_reg_in <= EX_MEM_reg_out(68 downto 64) & EX_MEM_reg_out(31 downto 0) & MemOutSToReg;	-- RF_D + ALU_out + MEM_out
+MEM_WB_reg : reg generic map(dataWidth => 74)
+				port map(clk => clk, rst => rst, we => we_MEM_WB_reg, data => MEM_WB_reg_in, dout => MEM_WB_reg_out);
 
 instr <= instrS;
-
 end Behavioral;

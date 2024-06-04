@@ -40,6 +40,7 @@ entity DECSTAGE is
            clk : in  STD_LOGIC;
            immed : out  STD_LOGIC_VECTOR (31 downto 0);
 			  ImmedControl: in STD_LOGIC_VECTOR(1 downto 0);
+			  RD: IN STD_LOGIC_VECTOR(4 downto 0);
            RF_A : out  STD_LOGIC_VECTOR (31 downto 0);
            RF_B : out  STD_LOGIC_VECTOR (31 downto 0);
 			  selMem : in std_logic);
@@ -92,7 +93,7 @@ architecture Behavioral of DECSTAGE is
 begin
 	--RF_B_sel = instr(30)
 	RF : registerFile
-		port map(clk => clk, addr1 => instr(25 downto 21), addr2 => RF2S, addrw => instr(20 downto 16),
+		port map(clk => clk, addr1 => instr(25 downto 21), addr2 => RF2S, addrw => RD,
 		dout1 => RF_A, dout2 => RF_B, din => dataToWriteToRF, we => RF_we, rst => rst);
 	mux_reg2 : mux2 generic map (dataWidth => 5)
 		port map(a1 => instr(15 downto 11), a2 => instr(20 downto 16), sel => RF_B_sel, b => RF2S);

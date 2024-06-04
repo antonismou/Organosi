@@ -36,29 +36,28 @@ end CPU;
 
 architecture Behavioral of CPU is
 COMPONENT Datapath
-    Port ( clk : in  STD_LOGIC;
-           rst : in  STD_LOGIC;
-           pcSel : in  STD_LOGIC;
-           pcLdEn : in  STD_LOGIC;
-           selBranch : in std_logic;
-           RFWe : in std_logic;
-           RFWrData : in std_logic;
-           RF_B_sel : in std_logic;
-           WeMem : in std_logic;
-           ALU_Bin_sel : in std_logic;
-           ALU_Func : in std_logic_vector(3 downto 0);
-           Zero : out std_logic;
-           Ovf : out std_logic;
-           Cout : out std_logic;
-           ImmedControl: in STD_LOGIC_VECTOR(1 downto 0);
-           instr : out  STD_LOGIC_VECTOR (31 downto 0);
-           selMem : in std_logic;
-           weImmed: in std_logic;
-           weAluOut: in std_logic;
-           we_Reg_to_Dec: in std_logic;
-           we_mem_to_wb: in std_logic;
-           we_RegA: in std_logic;
-           we_RegB: in std_logic);
+    Port (  clk : in  STD_LOGIC;
+            rst : in  STD_LOGIC;
+            pcSel : in  STD_LOGIC;
+            pcLdEn : in  STD_LOGIC;
+            selBranch : in std_logic;
+            RFWe : in std_logic;
+            RFWrData : in std_logic;
+            RF_B_sel : in std_logic;
+            WeMem : in std_logic;
+            ALU_Bin_sel : in std_logic;
+            ALU_Func : in std_logic_vector(3 downto 0);
+            Zero : out std_logic;
+            Ovf : out std_logic;
+            Cout : out std_logic;
+            ImmedControl: in STD_LOGIC_VECTOR(1 downto 0);
+            instr : out  STD_LOGIC_VECTOR (31 downto 0);
+            selMem : in std_logic;
+            we_DEC_IF_Immed_reg: in std_logic;
+            we_IF_DEC_reg: in std_logic;
+				we_DEC_EX_reg : in std_logic;
+				we_EX_MEM_reg: in std_logic;
+				we_MEM_WB_reg: in std_logic);
 END COMPONENT;
 COMPONENT Control
     Port ( instr : in  STD_LOGIC_VECTOR (31 downto 0);
@@ -85,7 +84,8 @@ COMPONENT Control
            we_mem_to_wb: out std_logic;
            we_Reg_to_Dec: out std_logic);
 END COMPONENT;
-signal pcSelS, pcLdEnS, rfWeS, rfBSelS, rfWrDataSelS, memWeS, aluBinSelS, zeroS, ovfS, coutS, selMemS, selBranchS, weAluOutS, weImmedS, we_Reg_to_DecS, we_mem_to_wbS, we_RegAS, we_RegBS: std_logic;
+signal pcSelS, pcLdEnS, rfWeS, rfBSelS, rfWrDataSelS, memWeS, aluBinSelS, zeroS, ovfS, coutS, selMemS, selBranchS, weAluOutS,
+	weImmedS, we_Reg_to_DecS, we_mem_to_wbS,we_DEC_EX_regS: std_logic;
 signal immedCS: std_logic_vector(1 downto 0);
 signal aluFuncS : std_logic_vector(3 downto 0);
 signal instrS : std_logic_vector(31 downto 0);
@@ -108,13 +108,12 @@ begin
         immedControl => immedCS,
         selMem => selMemS,
         selBranch => selBranchS,
-        weImmed => weImmedS,
-        weAluOut => weAluOutS,
-        we_Reg_A => we_RegAS, 
-        we_Reg_B => we_RegBS,
-        we_mem_to_wb => we_mem_to_wbS,
-        we_Reg_to_Dec => we_Reg_to_DecS);
-
+        we_DEC_IF_Immed_reg => weImmedS,
+        we_EX_MEM_reg => weAluOutS,
+        we_MEM_WB_reg => we_mem_to_wbS,
+        we_IF_DEC_reg => we_Reg_to_DecS;
+		  we_DEC_EX_reg => we_DEC_EX_regS);
+		  
 	 cpu_datapath: Datapath port map(
         clk => clk,
         rst => rst,
@@ -133,12 +132,10 @@ begin
         ImmedControl => immedCS,
         instr => instrS,
         selMem => selMemS,
-        weImmed => weImmedS,
-        weAluOut => weAluOutS,
-        we_Reg_to_Dec => we_Reg_to_DecS,
-        we_mem_to_wb => we_mem_to_wbS,
-        we_RegA => we_RegAS,
-        we_RegB => we_RegBS
+        we_DEC_IF_Immed_reg => weImmedS,
+        we_EX_MEM_reg => weAluOutS,
+        we_IF_DEC_reg => we_Reg_to_DecS,
+        we_MEM_WB_reg => we_mem_to_wbS,
     );
 
 end Behavioral;
