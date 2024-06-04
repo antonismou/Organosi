@@ -1,0 +1,124 @@
+----------------------------------------------------------------------------------
+-- Company: 
+-- Engineer: 
+-- 
+-- Create Date:    10:12:18 04/10/2024 
+-- Design Name: 
+-- Module Name:    ALU - Behavioral 
+-- Project Name: 
+-- Target Devices: 
+-- Tool versions: 
+-- Description: 
+--
+-- Dependencies: 
+--
+-- Revision: 
+-- Revision 0.01 - File Created
+-- Additional Comments: 
+--
+----------------------------------------------------------------------------------
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+-- Uncomment the following library declaration if using
+-- arithmetic functions with Signed or Unsigned values
+--use IEEE.NUMERIC_STD.ALL;
+
+-- Uncomment the following library declaration if instantiating
+-- any Xilinx primitives in this code.
+--library UNISIM;
+--use UNISIM.VComponents.all;
+
+entity ALU is
+Port ( A : in  STD_LOGIC_VECTOR (31 downto 0);
+           B : in  STD_LOGIC_VECTOR (31 downto 0);
+           Op : in  STD_LOGIC_VECTOR (3 downto 0);
+           Output : out  STD_LOGIC_VECTOR (31 downto 0);
+           Zero : out  STD_LOGIC;
+           Cout : out  STD_LOGIC;
+           Ovf : out  STD_LOGIC);
+end ALU;
+
+architecture Structural of ALU is
+
+Component add_sub_ALU is
+		Port(A : in  STD_LOGIC_VECTOR (31 downto 0);
+			B : in  STD_LOGIC_VECTOR (31 downto 0);
+			Op : in  STD_LOGIC_VECTOR (3 downto 0);
+			Output : out  STD_LOGIC_VECTOR (31 downto 0);
+			Zero : out  STD_LOGIC;
+			Cout : out  STD_LOGIC;
+			Ovf : out  STD_LOGIC);
+	end Component;	
+
+	Component alu_and_or_not is
+		Port(A : in  STD_LOGIC_VECTOR (31 downto 0);
+			B : in  STD_LOGIC_VECTOR (31 downto 0);
+			Op : in  STD_LOGIC_VECTOR (3 downto 0);
+			Output : out  STD_LOGIC_VECTOR (31 downto 0);
+			Zero : out  STD_LOGIC;
+			Cout : out  STD_LOGIC;
+			Ovf : out  STD_LOGIC);
+	end Component;	
+
+	Component alu_shiftLogic is
+		Port(A : in  STD_LOGIC_VECTOR (31 downto 0);
+			Op : in  STD_LOGIC_VECTOR (3 downto 0);
+			Output : out  STD_LOGIC_VECTOR (31 downto 0);
+			Zero : out  STD_LOGIC;
+			Cout : out  STD_LOGIC;
+			Ovf : out  STD_LOGIC);
+	end Component;
+	
+	Component mux4 is
+		port(
+			a1  : in std_logic_vector(31 downto 0);
+			a2  : in std_logic_vector(31 downto 0);
+			a3  : in std_logic_vector(31 downto 0);
+			a4  : in std_logic_vector(31 downto 0);
+			sel     : in  std_logic_vector(1 downto 0);
+			b       : out std_logic_vector(31 downto 0)
+			);
+	end component;
+	
+	Component mux4Single is
+		port(
+			a1  : in std_logic;
+			a2  : in std_logic;
+			a3  : in std_logic;
+			a4  : in std_logic;
+			sel     : in  std_logic_vector(1 downto 0);
+			b       : out std_logic
+			);
+	end component;
+	
+signal as_Cout,as_Ovf,as_Zero: STD_LOGIC;
+signal as_out: STD_LOGIC_VECTOR (31 downto 0);
+signal logic_Cout,logic_Ovf,logic_Zero : STD_LOGIC;
+signal logic_out: STD_LOGIC_VECTOR (31 downto 0);
+signal shift_Cout,shift_Ovf,shift_Zero: STD_LOGIC;
+signal shift_out: STD_LOGIC_VECTOR (31 downto 0);
+signal selS : STD_LOGIC_VECTOR(1 downto 0);
+begin
+
+add_sub: add_sub_ALU port map(
+		A=>A, B=>B, Op=>Op,Output=>as_out,Cout=>as_Cout,Ovf=>as_Ovf,Zero=>as_Zero);
+		
+logical : alu_and_or_not port map(
+		A=>A, B=>B, Op=>Op,Output=>logic_out,Cout=>logic_Cout,Ovf=>logic_Ovf,Zero=>logic_Zero);
+
+shiftlogic : alu_shiftLogic port map(
+		A=>A, Op=>Op,Output=>shift_out,Cout=>shift_Cout,Ovf=>shift_Ovf,Zero=>shift_Zero);
+selS(1) <=Op(3);
+selS(0) <=Op(2) or Op(1);
+mux_1: mux4 port map(
+		a1=>as_out, a2=>logic_out ,a3 => shift_out,a4 => shift_out,sel =>selS , b=> Output);
+mux_2: mux4Single port map(
+		a1=>as_Cout, a2=>logic_Cout ,a3 => shift_Cout,a4 => shift_Cout, sel =>selS, b=> Cout);
+mux_3: mux4Single port map(
+		a1=>as_Ovf, a2=>logic_Ovf ,a3 => shift_Ovf,a4 => shift_Ovf, sel =>selS, b=> Ovf);
+mux_4: mux4Single port map(
+		a1=>as_Zero, a2=>logic_Zero ,a3 => shift_Zero,a4 => shift_Zero, sel =>selS, b=> Zero);
+
+end Structural;
+
