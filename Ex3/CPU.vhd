@@ -60,29 +60,29 @@ COMPONENT Datapath
 				we_MEM_WB_reg: in std_logic);
 END COMPONENT;
 COMPONENT Control
-    Port ( instr : in  STD_LOGIC_VECTOR (31 downto 0);
-           zero : in std_logic;
-           ovf : in std_logic;
-           cout : in std_logic;
-           pcSel : out  STD_LOGIC;
-           pcLdEn : out  STD_LOGIC;
-           rfWe : out  STD_LOGIC;
-           rfBSel : out  STD_LOGIC;
-           rfWrDataSel : out  STD_LOGIC;
-           memWe : out  STD_LOGIC;
-           aluBinSel : out std_logic;
-           aluFunc : out STD_LOGIC_VECTOR(3 downto 0);
-           rst : in  STD_LOGIC;
-           clk: in STD_LOGIC;
-           immedControl: out STD_LOGIC_VECTOR(1 downto 0);
-           selMem : out std_logic;
-           selBranch : out std_logic;
-           weImmed: out std_logic;
-           weAluOut: out std_logic;
-           we_Reg_A: out std_logic;
-           we_Reg_B: out std_logic;
-           we_mem_to_wb: out std_logic;
-           we_Reg_to_Dec: out std_logic);
+     Port (	instr : in  STD_LOGIC_VECTOR (31 downto 0);
+			zero : in std_logic;
+			ovf : in std_logic;
+			cout : in std_logic;
+        	pcSel : out  STD_LOGIC;
+        	pcLdEn : out  STD_LOGIC;
+        	rfWe : out  STD_LOGIC;
+        	rfBSel : out  STD_LOGIC;
+        	rfWrDataSel : out  STD_LOGIC;
+        	memWe : out  STD_LOGIC;
+			aluBinSel : out std_logic;
+			aluFunc : out STD_LOGIC_VECTOR(3 downto 0);
+        	rstOut : out  STD_LOGIC;
+        	rst : in  STD_LOGIC;
+			clk: in STD_LOGIC;
+			immedControl: out STD_LOGIC_VECTOR(1 downto 0);
+			selMem : out std_logic;
+			we_IF_DEC_reg: out std_logic;
+			we_DEC_IF_reg: out std_logic;
+			we_DEC_EX_reg: out std_logic;
+			we_EX_MEM_reg: out std_logic;
+			we_MEM_WB_reg: out std_logic
+			);
 END COMPONENT;
 signal pcSelS, pcLdEnS, rfWeS, rfBSelS, rfWrDataSelS, memWeS, aluBinSelS, zeroS, ovfS, coutS, selMemS, selBranchS, weAluOutS,
 	weImmedS, we_Reg_to_DecS, we_mem_to_wbS,we_DEC_EX_regS: std_logic;
@@ -107,8 +107,7 @@ begin
         clk => clk,
         immedControl => immedCS,
         selMem => selMemS,
-        selBranch => selBranchS,
-        we_DEC_IF_Immed_reg => weImmedS,
+        we_DEC_IF_reg => weImmedS,
         we_EX_MEM_reg => weAluOutS,
         we_MEM_WB_reg => we_mem_to_wbS,
         we_IF_DEC_reg => we_Reg_to_DecS,
@@ -132,6 +131,7 @@ begin
         ImmedControl => immedCS,
         instr => instrS,
         selMem => selMemS,
+		  we_DEC_EX_reg => we_DEC_EX_regS,
         we_DEC_IF_Immed_reg => weImmedS,
         we_EX_MEM_reg => weAluOutS,
         we_IF_DEC_reg => we_Reg_to_DecS,

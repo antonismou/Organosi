@@ -154,7 +154,7 @@ DEC_EX_reg : reg generic map(dataWidth => 80)
 EX: ALU_ex port map(RF_A => DEC_EX_reg_out(63 downto 32), RF_B => DEC_EX_reg_out(31 downto 0), immed => immedS, ALU_Bin_sel => DEC_EX_reg_out(79),
     ALU_Func => DEC_EX_reg_out(78 downto 75) , ALU_out => ALU_outSToReg, Zero => Zero, Ovf => Ovf, Cout => Cout);
 -----------------------------------EX/MEM REG-----------------------------------
-EX_MEM_reg_in <= DEC_EX_reg_out(70 downto 64) & DEC_EX_reg_out(31 downto 0) & ALU_outSToReg ;	--cntrl + RF_D + RF_B + ALU_out
+EX_MEM_reg_in <= DEC_EX_reg_out(73 downto 64) & DEC_EX_reg_out(31 downto 0) & ALU_outSToReg ;	--cntrl + RF_D + RF_B + ALU_out
 EX_MEM_reg : reg generic map(dataWidth => 74)
 				port map(clk => clk, rst => rst, we => DEC_EX_reg_out(74), data => EX_MEM_reg_in, dout => EX_MEM_reg_out);
 ---------------------------------------MEM--------------------------------------

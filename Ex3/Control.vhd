@@ -60,8 +60,9 @@ type fsmStates is (rtype,li,lui,addi,andi,ori,b,beq,bne,lb,lw,sb,sw,idle,afterB)
 signal state,nextState : fsmStates;
 
 begin
-	findState : process(instr,clk)
+	findState : process(instr)
 	begin
+	--wait until clk'event and clk = '1';
 	if rst = '1' then
 			state <= idle;
 	else 
