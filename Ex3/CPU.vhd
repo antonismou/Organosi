@@ -111,7 +111,7 @@ begin
         we_DEC_IF_Immed_reg => weImmedS,
         we_EX_MEM_reg => weAluOutS,
         we_MEM_WB_reg => we_mem_to_wbS,
-        we_IF_DEC_reg => we_Reg_to_DecS;
+        we_IF_DEC_reg => we_Reg_to_DecS,
 		  we_DEC_EX_reg => we_DEC_EX_regS);
 		  
 	 cpu_datapath: Datapath port map(
@@ -135,7 +135,7 @@ begin
         we_DEC_IF_Immed_reg => weImmedS,
         we_EX_MEM_reg => weAluOutS,
         we_IF_DEC_reg => we_Reg_to_DecS,
-        we_MEM_WB_reg => we_mem_to_wbS,
+        we_MEM_WB_reg => we_mem_to_wbS
     );
 
 end Behavioral;
