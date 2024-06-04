@@ -125,41 +125,45 @@ COMPONENT MEM
            MEM_DataOut : out  STD_LOGIC_VECTOR (31 downto 0));
 END COMPONENT;
 signal instrS,instrSToReg,immedS,immedSToReg,RFASToReg,RFBSToReg,ALU_outSToReg,MemOutS,MemOutSToReg : STD_LOGIC_VECTOR(31 downto 0);
-signal RDs : std_logic_vector(4 downto 0);
-signal IF_DEC_reg_in,IF_DEC_reg_out : STD_LOGIC_VECTOR(39 - 18 downto 0);	--in/out for reg IF/DEC size: 18(cntrl S) + 32(instr)=40
-signal DEC_EX_reg_in,DEC_EX_reg_out : STD_LOGIC_VECTOR(82 - 14 downto 0);	--in/out for reg DEC/EX size: 14(cntrl S) + 5(RF_D) + 32(RF_A) + 32(RF_B)=83 
-signal EX_MEM_reg_in,EX_MEM_reg_out : STD_LOGIC_VECTOR(76 - 8 downto 0);	--in/out for reg EX/MEM size: 8(cntrl S) + 5(RF_D) + 32(RF_B) + 32(ALU_OUT) = 77
-signal MEM_WB_reg_in,MEM_WB_reg_out : STD_LOGIC_VECTOR(73 - 5 downto 0);	--in/out for reg MEM/WB size: 5(cntrl S) + 5(RF_D) + 32(ALU_out) + 32(MEM_out)= 74
+signal cntrlS : std_logic_vector(10 downto 0);
+signal IF_DEC_reg_in,IF_DEC_reg_out : STD_LOGIC_VECTOR(31 downto 0);	--in/out for reg IF/DEC size: 32(instr)
+signal DEC_EX_reg_in,DEC_EX_reg_out : STD_LOGIC_VECTOR(79 downto 0);	--in/out for reg DEC/EX size: 11(cntrl S)+ 5(RF_D)+ 32(RF_A)+ 32(RF_B)= 80 
+signal EX_MEM_reg_in,EX_MEM_reg_out : STD_LOGIC_VECTOR(73 downto 0);	--in/out for reg EX/MEM size: 5(cntrl S)+ 5(RF_D)+ 32(RF_B)+ 32(ALU_OUT)= 74
+signal MEM_WB_reg_in,MEM_WB_reg_out : STD_LOGIC_VECTOR(71 downto 0);	--in/out for reg MEM/WB size: 3(cntrl S)+ 5(RF_D)+ 32(ALU_out)+ 32(MEM_out)= 72
 begin
----------------------------------------IF--------------------------------------
-InsFetch: IFSTAGE port map(PC_Immed => immedS, PC_sel => pcSel, PC_LdEn => pcLdEn, rst => rst, clk => clk, Instr => instrSToReg);
+------------------CREATE VECTOR WITH ALL CONTROL SIGNALS FROM CONTROLLER------------------
+cntrlS <= ALU_Bin_sel & ALU_Func & we_EX_MEM_REG & WeMem & we_MEM_WB_REG & selMem & RFWe & RFWrData;
+---------------------------------------IF-------------------------------------- 
+InsFetch: IFSTAGE port map(PC_Immed => immedS, PC_sel =>pcSel, PC_LdEn => pcLdEn, rst => rst, clk => clk, Instr => instrSToReg);
 -----------------------------------IF/DEC REG----------------------------------
-IF_DEC_reg : reg port map(clk=> clk, rst => rst, we => we_IF_DEC_reg, data => instrSToReg, dout => instrS);
+IF_DEC_reg_in <= instrSToReg;		-- instr
+IF_DEC_reg : reg generic map(dataWidth => 32)
+				port map(clk=> clk, rst => rst, we => we_IF_DEC_reg, data => IF_DEC_reg_in, dout => IF_DEC_reg_out);
 --------------------------------------DEC--------------------------------------
 ID: DECSTAGE port map(
-    instr => instrS, rst => rst, clk => clk, RF_we => RFWe, ALUOut => MEM_WB_reg_out(63 downto 32), MEMOut => MEM_WB_reg_out(31 downto 0), 
-	 RF_B_sel => RF_B_sel,RF_wData_sel => RFWrData, immed => immedSToReg,RD=> MEM_WB_reg_out(68 downto 64) ,RF_A => RFASToReg, RF_B => RFBSToReg,
-	 ImmedControl => ImmedControl, selMem => selMem);
+    instr => instrS, rst => rst, clk => clk, RF_we => MEM_WB_reg_out(70), ALUOut => MEM_WB_reg_out(63 downto 32), MEMOut => MEM_WB_reg_out(31 downto 0), 
+	 RF_B_sel => RF_B_sel,RF_wData_sel => MEM_WB_reg_out(69), immed => immedSToReg,RD=> MEM_WB_reg_out(68 downto 64) ,RF_A => RFASToReg, RF_B => RFBSToReg,
+	 ImmedControl => ImmedControl, selMem => MEM_WB_reg_out(71));
 --------------------------------DEC/IF(IMMED)REG--------------------------------
 DEC_IF_Immed_reg: reg port map(clk=> clk, rst => rst, we => we_DEC_IF_Immed_reg, data => immedSToReg, dout => immedS);
 -----------------------------------DEC/EX REG-----------------------------------
-DEC_EX_reg_in <= instrS(20 downto 16) & RFASToReg & RFBSToReg ;	-- RF_D + RF_A + RF_B
-DEC_EX_reg : reg generic map(dataWidth => 83)
+DEC_EX_reg_in <= cntrlS & instrS(20 downto 16) & RFASToReg & RFBSToReg ;	--cntrl + RF_D + RF_A + RF_B
+DEC_EX_reg : reg generic map(dataWidth => 80)
 				port map(clk=> clk, rst => rst, we => we_DEC_EX_reg, data => DEC_EX_reg_in, dout => DEC_EX_reg_out); 
 ---------------------------------------EX---------------------------------------
-EX: ALU_ex port map(RF_A => DEC_EX_reg_out(63 downto 32), RF_B => DEC_EX_reg_out(31 downto 0), immed => immedS, ALU_Bin_sel => ALU_Bin_sel,
-    ALU_Func => ALU_Func , ALU_out => ALU_outSToReg, Zero => Zero, Ovf => Ovf, Cout => Cout);
+EX: ALU_ex port map(RF_A => DEC_EX_reg_out(63 downto 32), RF_B => DEC_EX_reg_out(31 downto 0), immed => immedS, ALU_Bin_sel => DEC_EX_reg_out(79),
+    ALU_Func => DEC_EX_reg_out(78 downto 75) , ALU_out => ALU_outSToReg, Zero => Zero, Ovf => Ovf, Cout => Cout);
 -----------------------------------EX/MEM REG-----------------------------------
-EX_MEM_reg_in <= DEC_EX_reg_out(68 downto 64) & DEC_EX_reg_out(31 downto 0) & ALU_outSToReg ;	-- RF_D + RF_B + ALU_out
-EX_MEM_reg : reg generic map(dataWidth => 77)
-				port map(clk => clk, rst => rst, we => we_EX_MEM_reg, data => EX_MEM_reg_in, dout => EX_MEM_reg_out);
+EX_MEM_reg_in <= DEC_EX_reg_out(70 downto 64) & DEC_EX_reg_out(31 downto 0) & ALU_outSToReg ;	--cntrl + RF_D + RF_B + ALU_out
+EX_MEM_reg : reg generic map(dataWidth => 74)
+				port map(clk => clk, rst => rst, we => DEC_EX_reg_out(74), data => EX_MEM_reg_in, dout => EX_MEM_reg_out);
 ---------------------------------------MEM--------------------------------------
-MEMO : MEM port map(clk => clk, Mem_WrEn => WeMem , ALU_MEM_addr => EX_MEM_reg_out(31 downto 0),
+MEMO : MEM port map(clk => clk, Mem_WrEn => EX_MEM_reg_out(73) , ALU_MEM_addr => EX_MEM_reg_out(31 downto 0),
 						  MEM_DataOut => MemOutSToReg, MEM_DataIn => EX_MEM_reg_out(63 downto 32));
 -----------------------------------MEM/WB REG-----------------------------------
-MEM_WB_reg_in <= EX_MEM_reg_out(68 downto 64) & EX_MEM_reg_out(31 downto 0) & MemOutSToReg;	-- RF_D + ALU_out + MEM_out
-MEM_WB_reg : reg generic map(dataWidth => 74)
-				port map(clk => clk, rst => rst, we => we_MEM_WB_reg, data => MEM_WB_reg_in, dout => MEM_WB_reg_out);
+MEM_WB_reg_in <= EX_MEM_reg_out(71 downto 64) & EX_MEM_reg_out(31 downto 0) & MemOutSToReg;	-- cntrl + RF_D + ALU_out + MEM_out
+MEM_WB_reg : reg generic map(dataWidth => 72)
+				port map(clk => clk, rst => rst, we => EX_MEM_reg_out(72), data => MEM_WB_reg_in, dout => MEM_WB_reg_out);
 
-instr <= instrS;
+instr <= IF_DEC_reg_out(31 downto 0);
 end Behavioral;
