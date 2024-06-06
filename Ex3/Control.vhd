@@ -86,7 +86,7 @@ begin
 	end process;
 	
 	
-	output: process(state,zero)
+	output: process(instr,state,zero)
 	begin
 		case state is
 			when idle =>
