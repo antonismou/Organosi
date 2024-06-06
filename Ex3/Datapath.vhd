@@ -124,7 +124,7 @@ COMPONENT MEM
            MEM_DataIn : in  STD_LOGIC_VECTOR (31 downto 0);
            MEM_DataOut : out  STD_LOGIC_VECTOR (31 downto 0));
 END COMPONENT;
-signal instrS,instrSToReg,immedS,immedSToReg,RFASToReg,RFBSToReg,ALU_outSToReg,MemOutS,MemOutSToReg : STD_LOGIC_VECTOR(31 downto 0);
+signal instrSToReg,immedS,immedSToReg,RFASToReg,RFBSToReg,ALU_outSToReg,MemOutS,MemOutSToReg : STD_LOGIC_VECTOR(31 downto 0);
 signal cntrlS : std_logic_vector(10 downto 0);
 signal IF_DEC_reg_in,IF_DEC_reg_out : STD_LOGIC_VECTOR(31 downto 0);	--in/out for reg IF/DEC size: 32(instr)
 signal DEC_EX_reg_in,DEC_EX_reg_out : STD_LOGIC_VECTOR(79 downto 0);	--in/out for reg DEC/EX size: 11(cntrl S)+ 5(RF_D)+ 32(RF_A)+ 32(RF_B)= 80 
@@ -141,13 +141,14 @@ IF_DEC_reg : reg generic map(dataWidth => 32)
 				port map(clk=> clk, rst => rst, we => we_IF_DEC_reg, data => IF_DEC_reg_in, dout => IF_DEC_reg_out);
 --------------------------------------DEC--------------------------------------
 ID: DECSTAGE port map(
-    instr => instrS, rst => rst, clk => clk, RF_we => MEM_WB_reg_out(70), ALUOut => MEM_WB_reg_out(63 downto 32), MEMOut => MEM_WB_reg_out(31 downto 0), 
-	 RF_B_sel => RF_B_sel,RF_wData_sel => MEM_WB_reg_out(69), immed => immedSToReg,RD=> MEM_WB_reg_out(68 downto 64) ,RF_A => RFASToReg, RF_B => RFBSToReg,
+    instr => IF_DEC_reg_out, rst => rst, clk => clk, RF_we => MEM_WB_reg_out(70), ALUOut => MEM_WB_reg_out(63 downto 32), MEMOut => MEM_WB_reg_out(31 downto 0), 
+	 RF_B_sel => RF_B_sel,RF_wData_sel => MEM_WB_reg_out(69), immed => immedSToReg,
+	 RD=> MEM_WB_reg_out(68 downto 64) ,RF_A => RFASToReg, RF_B => RFBSToReg,
 	 ImmedControl => ImmedControl, selMem => MEM_WB_reg_out(71));
 --------------------------------DEC/IF(IMMED)REG--------------------------------
 DEC_IF_Immed_reg: reg port map(clk=> clk, rst => rst, we => we_DEC_IF_Immed_reg, data => immedSToReg, dout => immedS);
 -----------------------------------DEC/EX REG-----------------------------------
-DEC_EX_reg_in <= cntrlS & instrS(20 downto 16) & RFASToReg & RFBSToReg ;	--cntrl + RF_D + RF_A + RF_B
+DEC_EX_reg_in <= cntrlS & IF_DEC_reg_out(20 downto 16) & RFASToReg & RFBSToReg ;	--cntrl + RF_D + RF_A + RF_B
 DEC_EX_reg : reg generic map(dataWidth => 80)
 				port map(clk=> clk, rst => rst, we => we_DEC_EX_reg, data => DEC_EX_reg_in, dout => DEC_EX_reg_out); 
 ---------------------------------------EX---------------------------------------
