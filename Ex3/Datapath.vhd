@@ -159,7 +159,7 @@ EX_MEM_reg_in <= DEC_EX_reg_out(73 downto 64) & DEC_EX_reg_out(31 downto 0) & AL
 EX_MEM_reg : reg generic map(dataWidth => 74)
 				port map(clk => clk, rst => rst, we => DEC_EX_reg_out(74), data => EX_MEM_reg_in, dout => EX_MEM_reg_out);
 ---------------------------------------MEM--------------------------------------
-MEMO : MEM port map(clk => clk, Mem_WrEn => EX_MEM_reg_out(73) , ALU_MEM_addr => EX_MEM_reg_out(31 downto 0),
+MEMO : MEM port map(clk => clk, Mem_WrEn => EX_MEM_reg_out(72) , ALU_MEM_addr => EX_MEM_reg_out(31 downto 0),
 						  MEM_DataOut => MemOutSToReg, MEM_DataIn => EX_MEM_reg_out(63 downto 32));
 -----------------------------------MEM/WB REG-----------------------------------
 MEM_WB_reg_in <= EX_MEM_reg_out(71 downto 64) & EX_MEM_reg_out(31 downto 0) & MemOutSToReg;	-- cntrl + RF_D + ALU_out + MEM_out
