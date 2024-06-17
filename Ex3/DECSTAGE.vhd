@@ -33,8 +33,7 @@ entity DECSTAGE is
     Port ( instr : in  STD_LOGIC_VECTOR (31 downto 0);
 			  rst : in std_logic;
            RF_we : in  STD_LOGIC;
-           ALUOut : in  STD_LOGIC_VECTOR (31 downto 0);
-           MEMOut : in  STD_LOGIC_VECTOR (31 downto 0);
+           WBdata : in  STD_LOGIC_VECTOR (31 downto 0);
            RF_wData_sel : in  STD_LOGIC;
            RF_B_sel : in  STD_LOGIC;
            clk : in  STD_LOGIC;
@@ -43,6 +42,7 @@ entity DECSTAGE is
 			  RD: IN STD_LOGIC_VECTOR(4 downto 0);
            RF_A : out  STD_LOGIC_VECTOR (31 downto 0);
            RF_B : out  STD_LOGIC_VECTOR (31 downto 0);
+			  addr_RF_B: out STD_LOGIC_VECTOR (4 downto 0);
 			  selMem : in std_logic);
 end DECSTAGE;
 
@@ -88,24 +88,15 @@ architecture Behavioral of DECSTAGE is
         );
     END COMPONENT;
 	 signal RF2S: std_logic_vector(4 downto 0);
-	 signal dataToWriteToRF,selectedDataS, MEMOutS : std_logic_vector(31 downto 0);
-	 signal selectedDataMuxOut : std_logic_vector(7 downto 0);
 begin
 	--RF_B_sel = instr(30)
 	RF : registerFile
 		port map(clk => clk, addr1 => instr(25 downto 21), addr2 => RF2S, addrw => RD,
-		dout1 => RF_A, dout2 => RF_B, din => dataToWriteToRF, we => RF_we, rst => rst);
+		dout1 => RF_A, dout2 => RF_B, din => WBdata, we => RF_we, rst => rst);
 	mux_reg2 : mux2 generic map (dataWidth => 5)
 		port map(a1 => instr(15 downto 11), a2 => instr(20 downto 16), sel => RF_B_sel, b => RF2S);
-	mux_wdata : mux2 generic map (dataWidth => 32)
-		port map(a1 => ALUOut, a2 => MEMOutS, sel => RF_wData_sel, b => dataToWriteToRF);
 	cloudUnit : cloud port map(din => instr(15 downto 0), immed => immed, ImmedControl => ImmedControl);
-	mux_forBits:mux4 generic map(dataWidth => 8)
-		port map(a1=>MEMOut(7 downto 0), a2=>MEMOut(15 downto 8), a3=>MEMOut(23 downto 16), a4=> MEMOut(31 downto 24),
-		sel => ALUOut(1 downto 0) ,b => selectedDataMuxOut);
-	selectedDataS <= (31 downto 8 => '0') & selectedDataMuxOut;
-	mux_forMEM: mux2 generic map (dataWidth => 32)
-		port map(a1 => MEMOut, a2 => selectedDataS, sel => selMem, b => MEMOutS);
-	
+		
+ addr_RF_B<=RF2S;
 end Behavioral;
 

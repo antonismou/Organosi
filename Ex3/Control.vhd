@@ -107,10 +107,10 @@ begin
 				rfWrDataSel <= '0';
 				--REGISTERS BETWEEN STAGES
 				we_IF_DEC_reg <= '1';
-				we_DEC_IF_reg <= '0';
-				we_DEC_EX_reg <= '0';
-				we_EX_MEM_reg <= '0';
-				we_MEM_WB_reg <= '0';
+				we_DEC_IF_reg <= '1';
+				we_DEC_EX_reg <= '1';
+				we_EX_MEM_reg <= '1';
+				we_MEM_WB_reg <= '1';
 				--NextState
 				nextState<= idle;
 			when rtype => 
@@ -397,7 +397,7 @@ begin
 				aluFunc <= "0000";
 				-- Mem State
 				selMem <= 'X';
-				memWe <= '0';
+				memWe <= '1';
 				--WbState
 				rfWe <= '0';
 				rfWrDataSel <= 'X';
