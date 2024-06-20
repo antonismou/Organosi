@@ -36,7 +36,10 @@ entity IFSTAGE is
            PC_LdEn : in  STD_LOGIC;
            rst : in  STD_LOGIC;
            clk : in  STD_LOGIC;
-           Instr : out  STD_LOGIC_VECTOR (31 downto 0));
+           Instr : out  STD_LOGIC_VECTOR (31 downto 0);
+			  pc_count : out STD_LOGIC_VECTOR (31 downto 0);
+			  old_pc : in STD_LOGIC_VECTOR (31 downto 0)
+			  );
 end IFSTAGE;
 
 architecture Behavioral of IFSTAGE is
@@ -80,7 +83,7 @@ incr_4: incrementor port map(
 	a=>reg_out, b=>x"00000004",output=>incrementor_4_out);
 	
 incr_immed: incrementor port map(
-	a=>incrementor_4_out, b=>PC_Immed,output=>incrementor_out);
+	a=>old_pc, b=>PC_Immed,output=>incrementor_out);
 	
 mux: mux2 port map(
 	a1=>incrementor_4_out,a2=>incrementor_out,sel=>PC_sel,b=>mux2_out);
@@ -91,6 +94,6 @@ program_counter: reg port map(
 rom_mem : IFROM port map (
 	clk=>clk,a=>reg_out(11 downto 2), spo=>Instr);
 
-
+pc_count <= reg_out;
 
 end Behavioral;

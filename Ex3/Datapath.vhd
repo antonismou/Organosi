@@ -84,7 +84,9 @@ COMPONENT IFSTAGE
          PC_LdEn : IN  std_logic;
          rst : IN  std_logic;
          clk : IN  std_logic;
-         Instr : OUT  std_logic_vector(31 downto 0)
+         Instr : OUT  std_logic_vector(31 downto 0);
+			pc_count : out STD_LOGIC_VECTOR (31 downto 0);
+			old_pc : in STD_LOGIC_VECTOR (31 downto 0)
     );
 END COMPONENT;
 
@@ -160,7 +162,8 @@ signal muxA_out,muxB_out: STD_LOGIC_VECTOR(31 downto 0);
 signal dataToWriteToRF,selectedDataS,MEMoutS : std_logic_vector(31 downto 0);
 signal selectedDataMuxOut : std_logic_vector(7 downto 0);
 signal addr_RFB: std_logic_vector(4 downto 0);
-signal instrSToReg,immedS,immedSToReg,RFASToReg,RFBSToReg,ALU_outSToReg,MemOutSToReg : STD_LOGIC_VECTOR(31 downto 0);
+signal instrSToReg,immedSToReg,RFASToReg,RFBSToReg,ALU_outSToReg,MemOutSToReg,pc_countS : STD_LOGIC_VECTOR(31 downto 0);
+signal DEC_IF_reg_in,immedS1,immedS2 : STD_LOGIC_VECTOR(64 downto 0); --oldpc + pcSel + immed 
 signal cntrlS : std_logic_vector(10 downto 0);
 signal IF_DEC_reg_in,IF_DEC_reg_out : STD_LOGIC_VECTOR(31 downto 0);	--in/out for reg IF/DEC size: 32(instr)
 signal DEC_EX_reg_in,DEC_EX_reg_out : STD_LOGIC_VECTOR(89 downto 0);	--in/out for reg DEC/EX size: 5(addr_RF_s)+ 5(addr_RF_t)+ 11(cntrl S)+ 5(addr_RF_D)+ 32(RF_A)+ 32(RF_B)= 90 
@@ -195,7 +198,8 @@ muxB: mux4 port map(
 ------------------CREATE VECTOR WITH ALL CONTROL SIGNALS FROM CONTROLLER------------------
 cntrlS <= ALU_Bin_sel & ALU_Func & we_EX_MEM_REG & WeMem & we_MEM_WB_REG & selMem & RFWe & RFWrData;
 ---------------------------------------IF-------------------------------------- 
-InsFetch: IFSTAGE port map(PC_Immed => immedS, PC_sel =>pcSel, PC_LdEn => pcLdEn, rst => rst, clk => clk, Instr => instrSToReg);
+InsFetch: IFSTAGE port map(PC_Immed => immedS2(31 downto 0), PC_sel =>immedS2(32), PC_LdEn => pcLdEn, rst => rst, 
+	clk => clk, Instr => instrSToReg,pc_count => pc_countS, old_pc => immedS2(64 downto 33));
 -----------------------------------IF/DEC REG----------------------------------
 IF_DEC_reg_in <= instrSToReg;		-- instr
 IF_DEC_reg : reg generic map(dataWidth => 32)
@@ -208,8 +212,13 @@ ID: DECSTAGE port map(
 	 RD=> MEM_WB_reg_out(68 downto 64) ,RF_A => RFASToReg, RF_B => RFBSToReg,
 	 addr_RF_B=>addr_RFB,
 	 ImmedControl => ImmedControl, selMem => MEM_WB_reg_out(71));
---------------------------------DEC/IF(IMMED)REG--------------------------------
-DEC_IF_Immed_reg: reg port map(clk=> clk, rst => rst, we => we_DEC_IF_Immed_reg, data => immedSToReg, dout => immedS);
+--------------------------------DEC/IF(IMMED)REG1--------------------------------
+DEC_IF_reg_in <=pc_countS & pcSel & immedSToReg;
+DEC_IF_Immed_reg1: reg generic map(dataWidth => 65)
+	port map(clk=> clk, rst => rst, we => we_DEC_IF_Immed_reg, data => DEC_IF_reg_in, dout => immedS1);
+--------------------------------DEC/IF(IMMED)REG2--------------------------------
+DEC_IF_Immed_reg2: reg generic map(dataWidth => 65)
+	port map(clk=> clk, rst => rst, we => we_DEC_IF_Immed_reg, data => immedS1, dout => immedS2);
 -----------------------------------DEC/EX REG-----------------------------------
 DEC_EX_reg_in <= IF_DEC_reg_out(25 downto 21) & addr_RFB & cntrlS & IF_DEC_reg_out(20 downto 16) & RFASToReg & RFBSToReg ;
 DEC_EX_reg : reg generic map(dataWidth => 90)
@@ -217,7 +226,7 @@ DEC_EX_reg : reg generic map(dataWidth => 90)
 --cntrlS = ALU_Bin_sel(79) & ALU_Func(78 downto 75) & we_EX_MEM_REG(74) & WeMem(73) & we_MEM_WB_REG(72) & selMem(71) & RFWe(70) & RFWrData(69)
 --DEC_EX_reg_out = addr_RF_s(89 downto 85)+ addr_RF_t(84 downto 80)+ cntrlS(79 downto 69)+ addr_RF_D(68 downto 64)+ RF_A(63 downto 32)+ RF_B (31 downto 0)				
 ---------------------------------------EX---------------------------------------
-EX: ALU_ex port map(RF_A => muxA_out, RF_B => muxB_out, immed => immedS, ALU_Bin_sel => DEC_EX_reg_out(79),
+EX: ALU_ex port map(RF_A => muxA_out, RF_B => muxB_out, immed => immedS2(31 downto 0), ALU_Bin_sel => DEC_EX_reg_out(79),
     ALU_Func => DEC_EX_reg_out(78 downto 75) , ALU_out => ALU_outSToReg, Zero => Zero, Ovf => Ovf, Cout => Cout);
 -----------------------------------EX/MEM REG-----------------------------------
 EX_MEM_reg_in <= DEC_EX_reg_out(73 downto 64) & DEC_EX_reg_out(31 downto 0) & ALU_outSToReg ;
